@@ -13,7 +13,6 @@ apt-get install bind9 bind9utils
 Configure the server startup, for ipv4 only (`-4`) running as the user "bind" (`-u bind`).
 
 ```bash
-# Set up the be
 OPTIONS="-4 -u bind"
 ```
 
