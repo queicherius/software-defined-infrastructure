@@ -1,6 +1,6 @@
 # DNS
 
-## Setting up bind9
+## Install bind9
 
 Install the server and utilities.
 
@@ -8,15 +8,13 @@ Install the server and utilities.
 apt-get install bind9 bind9utils
 ```
 
----
-
 Configure the server startup, for ipv4 only (`-4`) running as the user "bind" (`-u bind`).
 
 ```bash
 OPTIONS="-4 -u bind"
 ```
 
----
+## Setup the global options
 
 Update the global options in `/etc/bind/named.conf.options`
 
@@ -45,7 +43,7 @@ options {
 };
 ```
 
----
+## Setup zones
 
 Create a folder for the zones we want to set up
 
@@ -100,8 +98,6 @@ $TTL    604800
 
 **Note:** "Serial" denotes a version, which helps the secondary DNS recognize new zone files. The convention for naming this is `YYYYMMDDSS` with `SS` being a incrementing version number.
 
----
-
 Make bind9 aware of our newly configured zones in `/etc/bind/named.conf.local`
 
 ```
@@ -115,8 +111,6 @@ zone "75.62.141.in-addr.arpa" {
   file "/etc/bind/zones/db.141.62.75";
 };
 ```
-
----
 
 Reload the server to apply all configuration changes.
 
