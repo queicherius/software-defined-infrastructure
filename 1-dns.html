@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="assets/style.css?t=a44c9e9d">
+    <script src="assets/script.js?t=820b7ffa"></script>
+    <title>DNS</title>
+    <meta name="viewport" content="width=device-width">
+  </head>
+  <body class="-menu-visible">
+    <div class="doc-layout">
+      <div class="toggle menu-toggle js-menu-toggle"></div>
+      <div class="body page-1-dns">
+        <div class="header-nav">
+          <div class="right">
+          </div>
+        </div>
+        <div class="markdown-body"><h1 id="dns">DNS</h1>
+<blockquote>
+<p><strong>Note:</strong> If you are looking for the options of <code>bind</code>, <a href="http://www.zytrax.com/books/dns/ch7/statements.html">this website</a> proved to be a good source of information.</p>
+</blockquote>
+<h2 id="installing-bind">Installing bind</h2>
+<p>First, we have to install the server and utilities to run the DNS server.</p>
+<pre><code class="lang-bash">apt-get install <span class="pl-c1">bind</span>9 <span class="pl-c1">bind</span>9utils
+</code></pre>
+<p>Next, we change the configuration in <code>/etc/default/bind9</code> to run the server for ipv4 only (<code>-4</code>) and using a specific user &quot;bind&quot; (<code>-u bind</code>) for it:</p>
+<pre><code class="lang-bash">OPTIONS=<span class="pl-s">&quot;-4 -u bind&quot;</span>
+</code></pre>
+<p>As the last step, we update the global options in <code>/etc/bind/named.conf.options</code>. Every option is explained by the accompanying comment.</p>
+<pre><code class="lang-aconf">options {
+  directory &quot;/var/cache/bind&quot;;
+
+  # Disable recursive DNS queries
+  recursion no;
+
+  # Listen on the private network only (local IP)
+  listen-on { 141.62.75.112; };
+
+  # Disable zone transfers, because we don&apos;t have a
+  # redundant infrastructure (primary / secondary dns)
+  allow-transfer { none; };
+
+  # Currently, we don&apos;t want to forward requests to stable nameservers
+  forwarders {};
+
+  # Use the default settings for validation and ipv6
+  dnssec-validation auto;
+  auth-nxdomain no;
+  listen-on-v6 { any; };
+};
+</code></pre>
+<p>We reload the server to apply all configuration changes.</p>
+<pre><code class="lang-bash">service <span class="pl-c1">bind</span>9 reload
+</code></pre>
+<h2 id="basic-configuration">Basic configuration</h2>
+<p>Now that we have a running DNS server, we create a folder for the zones we want to set up.</p>
+<pre><code class="lang-bash">mkdir /etc/<span class="pl-c1">bind</span>/zones
+</code></pre>
+<p>We setup the forward lookup zone in <code>/etc/bind/zones/db.mi.hdm-stuttgart.de</code>. This maps hostnames to IP adresses.</p>
+<pre><code>$TTL    604800
+@       IN      SOA     ns5.mi.hdm-stuttgart.de. root.mi.hdm-stuttgart.de. (
+                     2016040101         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+
+; name servers - NS records
+        IN      NS      ns5.mi.hdm-stuttgart.de.
+
+
+; name servers - A records
+ns5.mi.hdm-stuttgart.de.          IN      A       141.62.75.112
+www5_1.mi.hdm-stuttgart.de.       IN      CNAME   ns5.mi.hdm-stuttgart.de.
+www5_2.mi.hdm-stuttgart.de.       IN      CNAME   ns5.mi.hdm-stuttgart.de.
+</code></pre>
+<p>We also have to set up the reverse lookup zone in <code>/etc/bind/zones/db.141.62.75</code>. This is the equivalent of the lookup zone we already set up and maps IP addresses to hostnames.</p>
+<pre><code>$TTL    604800
+@       IN      SOA     ns5.mi.hdm-stuttgart.de. root.mi.hdm-stuttgart.de. (
+                     2016040101         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+
+; name servers - NS records
+      IN      NS      ns5.mi.hdm-stuttgart.de.
+
+; PTR Records
+104   IN      PTR     sdi5b.mi.hdm-stuttgart.de.
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> &quot;Serial&quot; denotes a version, which helps the secondary DNS (= slave server) recognise new zone files. The convention for naming this is <code>YYYYMMDDSS</code> with <code>SS</code> being an incrementing version number which has to be updated for every change.</p>
+</blockquote>
+<p>With our zones configured, we have to make bind9 aware of them. We add our new zones in <code>/etc/bind/named.conf.local</code></p>
+<pre><code>zone &quot;mi.hdm-stuttgart.de&quot; {
+  type master;
+  file &quot;/etc/bind/zones/db.mi.hdm-stuttgart.de&quot;;
+};
+
+zone &quot;75.62.141.in-addr.arpa&quot; {
+  type master;
+  file &quot;/etc/bind/zones/db.141.62.75&quot;;
+};
+</code></pre>
+<p>To check if the <code>named.conf.local</code> file has the correct syntax, we can run the following command, which should return to the shell without any messages:</p>
+<pre><code class="lang-bash">named-checkconf /etc/<span class="pl-c1">bind</span>/named.conf.local
+</code></pre>
+<p>Once again, we reload the server to apply all configuration changes.</p>
+<pre><code class="lang-bash">service <span class="pl-c1">bind</span>9 reload
+</code></pre>
+<p>Now we can check if the nameserver resolves the zones that we just added.</p>
+<pre><code class="lang-bash"><span class="pl-c"># The added name resolves into the IP (forward lookup)</span>
+dig @141.62.75.112 sdi5b.mi.hdm-stuttgart.de
+dig @141.62.75.112 www5_1.mi.hdm-stuttgart.de
+
+<span class="pl-c"># The added IP resolves into the IP (reverse lookup)</span>
+dig @141.62.75.112 -x 141.62.75.112
+
+<span class="pl-c"># This does not resolve since we don&apos;t have A name</span>
+<span class="pl-c"># records for it and recursive DNS queries are disabled</span>
+dig @141.62.75.112 spiegel.de
+</code></pre>
+<h2 id="forwarders">Forwarders</h2>
+<p>Due to the <code>recursion no</code> in the configuration, currently, only queries regarding objects within the defined zones are supported. To enable forwarding to &quot;real&quot; DNS servers, we configure the options in <code>/etc/bind/named.conf.options</code>.</p>
+<pre><code class="lang-aconf">options {
+  # ...
+  
+  # List of IP addresses to which queries will be forwarded
+  forwarders {
+    141.62.64.127;
+    141.62.64.128;
+    141.62.64.21;
+  };
+  
+  # Send the query the forwarders
+  forward first;
+  
+  # Allow for recursive queries from our non-secure DNS server
+  dnssec-enable no;
+  
+  # ...
+}
+</code></pre>
+<h2 id="mail-exchange-record">Mail exchange record</h2>
+<p>Since we want to be able to send emails via our domain as well, we have to set up an MX record in <code>/etc/bind/zones/db.mi.hdm-stuttgart.de</code>. We already have a mail server provided by our system administrator, so we are going to use that.</p>
+<pre><code>; name servers - NS records
+      IN      NS      ns5.mi.hdm-stuttgart.de.
+
+; mail servers - MX records
+      IN      MX 10   mx1.hdm-stuttgart.de.
+</code></pre>
+<p>After a restart with <code>service bind9 reload</code>, we can check our configuration using <code>nslookup</code>. The lookup should result in the configured A record.</p>
+<pre><code>nslookup
+&gt; set type=mx
+&gt; sdi5b.mi.hdm-stuttgart.de
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> We couldn&apos;t actually check if emails could be delivered because the Firewall was filtering out emails out as a security measure for the already existing mail servers.</p>
+</blockquote>
+
+        </div>
+        <div class="footer-nav">
+          <div class="left"><a href="index.html"><span class="title">SDI</span></a></div>
+          <div class="right"><a href="2-ldap.html"><span class="label">Next: </span><span class="title">LDAP</span></a></div>
+        </div>
+      </div>
+      <div class="menu toc-menu">
+        <li class="menu-item -level-0 -parent">
+          <ul class="submenu">
+            <li class="menu-item -level-1"><a href="index.html" class="link title  link-index">SDI</a>
+            </li>
+            <li class="menu-item -level-1"><a href="1-dns.html" class="link title -active link-1-dns">DNS</a>
+              <ul class="headings heading-list">
+                <li class="heading-item -depth-2"><a href="#installing-bind" class="hlink link-installing-bind">Installing bind</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#basic-configuration" class="hlink link-basic-configuration">Basic configuration</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#forwarders" class="hlink link-forwarders">Forwarders</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#mail-exchange-record" class="hlink link-mail-exchange-record">Mail exchange record</a>
+                </li>
+              </ul>
+            </li>
+            <li class="menu-item -level-1"><a href="2-ldap.html" class="link title  link-2-ldap">LDAP</a>
+            </li>
+            <li class="menu-item -level-1"><a href="3-apache.html" class="link title  link-3-apache">Apache</a>
+            </li>
+            <li class="menu-item -level-1"><a href="4-samba.html" class="link title  link-4-samba">Samba</a>
+            </li>
+            <li class="menu-item -level-1"><a href="5-mail.html" class="link title  link-5-mail">Mail</a>
+            </li>
+            <li class="menu-item -level-1"><a href="6-nagios.html" class="link title  link-6-nagios">Nagios</a>
+            </li>
+          </ul>
+        </li>
+      </div>
+    </div>
+  </body>
+</html>

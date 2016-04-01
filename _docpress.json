@@ -1,0 +1,510 @@
+{
+  "toc": {
+    "sections": [
+      {
+        "title": "SDI",
+        "source": "README.md",
+        "url": "index.html",
+        "slug": "index",
+        "headings": [
+          {
+            "title": "Table of Contents",
+            "depth": 3,
+            "id": "table-of-contents"
+          }
+        ]
+      },
+      {
+        "title": "DNS",
+        "source": "docs/1-dns.md",
+        "url": "1-dns.html",
+        "slug": "1-dns",
+        "headings": [
+          {
+            "title": "Installing bind",
+            "depth": 2,
+            "id": "installing-bind"
+          },
+          {
+            "title": "Basic configuration",
+            "depth": 2,
+            "id": "basic-configuration"
+          },
+          {
+            "title": "Forwarders",
+            "depth": 2,
+            "id": "forwarders"
+          },
+          {
+            "title": "Mail exchange record",
+            "depth": 2,
+            "id": "mail-exchange-record"
+          }
+        ]
+      },
+      {
+        "title": "LDAP",
+        "source": "docs/2-ldap.md",
+        "url": "2-ldap.html",
+        "slug": "2-ldap",
+        "headings": [
+          {
+            "title": "Browse an existing LDAP server",
+            "depth": 2,
+            "id": "browse-an-existing-ldap-server"
+          },
+          {
+            "title": "Set up an OpenLDAP server",
+            "depth": 2,
+            "id": "set-up-an-openldap-server"
+          },
+          {
+            "title": "Populating your DIT",
+            "depth": 2,
+            "id": "populating-your-dit"
+          },
+          {
+            "title": "Testing a bind operation as non-admin",
+            "depth": 2,
+            "id": "testing-a-bind-operation-as-non-admin"
+          },
+          {
+            "title": "Accessing LDAP data by a mail client",
+            "depth": 2,
+            "id": "accessing-ldap-data-by-a-mail-client"
+          },
+          {
+            "title": "LDAP configuration",
+            "depth": 2,
+            "id": "ldap-configuration"
+          },
+          {
+            "title": "Filter based search",
+            "depth": 2,
+            "id": "filter-based-search"
+          },
+          {
+            "title": "Extending an existing entry",
+            "depth": 2,
+            "id": "extending-an-existing-entry"
+          },
+          {
+            "title": "Providing web-based user management",
+            "depth": 2,
+            "id": "providing-web-based-user-management"
+          },
+          {
+            "title": "Backup and recovery / restore",
+            "depth": 2,
+            "id": "backup-and-recovery-restore"
+          }
+        ]
+      },
+      {
+        "title": "Apache",
+        "source": "docs/3-apache.md",
+        "url": "3-apache.html",
+        "slug": "3-apache",
+        "headings": [
+          {
+            "title": "Installing",
+            "depth": 2,
+            "id": "installing"
+          },
+          {
+            "title": "Installing documentation",
+            "depth": 2,
+            "id": "installing-documentation"
+          },
+          {
+            "title": "Configuring our own alias",
+            "depth": 2,
+            "id": "configuring-our-own-alias"
+          },
+          {
+            "title": "Virtual hosts",
+            "depth": 2,
+            "id": "virtual-hosts"
+          },
+          {
+            "title": "SSL / TLS Support",
+            "depth": 2,
+            "id": "ssl-tls-support"
+          },
+          {
+            "title": "LDAP authentication",
+            "depth": 2,
+            "id": "ldap-authentication"
+          },
+          {
+            "title": "MySQL Database",
+            "depth": 2,
+            "id": "mysql-database"
+          },
+          {
+            "title": "Publish our documentation",
+            "depth": 2,
+            "id": "publish-our-documentation"
+          }
+        ]
+      },
+      {
+        "title": "Samba",
+        "source": "docs/4-samba.md",
+        "url": "4-samba.html",
+        "slug": "4-samba",
+        "headings": [
+          {
+            "title": "Install",
+            "depth": 2,
+            "id": "install"
+          },
+          {
+            "title": "Create a Samba user",
+            "depth": 2,
+            "id": "create-a-samba-user"
+          },
+          {
+            "title": "Connect and mount CIFS",
+            "depth": 2,
+            "id": "connect-and-mount-cifs"
+          }
+        ]
+      },
+      {
+        "title": "Mail",
+        "source": "docs/5-mail.md",
+        "url": "5-mail.html",
+        "slug": "5-mail",
+        "headings": [
+          {
+            "title": "Install and send to local users",
+            "depth": 2,
+            "id": "install-and-send-to-local-users",
+            "headings": [
+              {
+                "title": "Installing and testing postfix",
+                "depth": 3,
+                "id": "installing-and-testing-postfix"
+              },
+              {
+                "title": "Using an alias",
+                "depth": 3,
+                "id": "using-an-alias"
+              },
+              {
+                "title": "Setting up MX records",
+                "depth": 3,
+                "id": "setting-up-mx-records"
+              }
+            ]
+          },
+          {
+            "title": "Authentication Setup and Virtual Users",
+            "depth": 2,
+            "id": "authentication-setup-and-virtual-users",
+            "headings": [
+              {
+                "title": "Add authentication to postfix",
+                "depth": 3,
+                "id": "add-authentication-to-postfix"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Nagios",
+        "source": "docs/6-nagios.md",
+        "url": "6-nagios.html",
+        "slug": "6-nagios",
+        "headings": [
+          {
+            "title": "Installing",
+            "depth": 2,
+            "id": "installing"
+          },
+          {
+            "title": "Contact information",
+            "depth": 2,
+            "id": "contact-information"
+          },
+          {
+            "title": "Configuring remote inspection",
+            "depth": 2,
+            "id": "configuring-remote-inspection"
+          },
+          {
+            "title": "Configuring \"Apache\" service",
+            "depth": 2,
+            "id": "configuring-\"apache\"-service"
+          },
+          {
+            "title": "Configuring \"ldap\" service",
+            "depth": 2,
+            "id": "configuring-\"ldap\"-service"
+          },
+          {
+            "title": "Defining dependencies",
+            "depth": 2,
+            "id": "defining-dependencies"
+          }
+        ]
+      }
+    ]
+  },
+  "index": {
+    "index.html": {
+      "source": "README.md",
+      "title": "SDI",
+      "slug": "index",
+      "headings": [
+        {
+          "title": "Table of Contents",
+          "depth": 3,
+          "id": "table-of-contents"
+        }
+      ]
+    },
+    "1-dns.html": {
+      "source": "docs/1-dns.md",
+      "title": "DNS",
+      "slug": "1-dns",
+      "headings": [
+        {
+          "title": "Installing bind",
+          "depth": 2,
+          "id": "installing-bind"
+        },
+        {
+          "title": "Basic configuration",
+          "depth": 2,
+          "id": "basic-configuration"
+        },
+        {
+          "title": "Forwarders",
+          "depth": 2,
+          "id": "forwarders"
+        },
+        {
+          "title": "Mail exchange record",
+          "depth": 2,
+          "id": "mail-exchange-record"
+        }
+      ]
+    },
+    "2-ldap.html": {
+      "source": "docs/2-ldap.md",
+      "title": "LDAP",
+      "slug": "2-ldap",
+      "headings": [
+        {
+          "title": "Browse an existing LDAP server",
+          "depth": 2,
+          "id": "browse-an-existing-ldap-server"
+        },
+        {
+          "title": "Set up an OpenLDAP server",
+          "depth": 2,
+          "id": "set-up-an-openldap-server"
+        },
+        {
+          "title": "Populating your DIT",
+          "depth": 2,
+          "id": "populating-your-dit"
+        },
+        {
+          "title": "Testing a bind operation as non-admin",
+          "depth": 2,
+          "id": "testing-a-bind-operation-as-non-admin"
+        },
+        {
+          "title": "Accessing LDAP data by a mail client",
+          "depth": 2,
+          "id": "accessing-ldap-data-by-a-mail-client"
+        },
+        {
+          "title": "LDAP configuration",
+          "depth": 2,
+          "id": "ldap-configuration"
+        },
+        {
+          "title": "Filter based search",
+          "depth": 2,
+          "id": "filter-based-search"
+        },
+        {
+          "title": "Extending an existing entry",
+          "depth": 2,
+          "id": "extending-an-existing-entry"
+        },
+        {
+          "title": "Providing web-based user management",
+          "depth": 2,
+          "id": "providing-web-based-user-management"
+        },
+        {
+          "title": "Backup and recovery / restore",
+          "depth": 2,
+          "id": "backup-and-recovery-restore"
+        }
+      ]
+    },
+    "3-apache.html": {
+      "source": "docs/3-apache.md",
+      "title": "Apache",
+      "slug": "3-apache",
+      "headings": [
+        {
+          "title": "Installing",
+          "depth": 2,
+          "id": "installing"
+        },
+        {
+          "title": "Installing documentation",
+          "depth": 2,
+          "id": "installing-documentation"
+        },
+        {
+          "title": "Configuring our own alias",
+          "depth": 2,
+          "id": "configuring-our-own-alias"
+        },
+        {
+          "title": "Virtual hosts",
+          "depth": 2,
+          "id": "virtual-hosts"
+        },
+        {
+          "title": "SSL / TLS Support",
+          "depth": 2,
+          "id": "ssl-tls-support"
+        },
+        {
+          "title": "LDAP authentication",
+          "depth": 2,
+          "id": "ldap-authentication"
+        },
+        {
+          "title": "MySQL Database",
+          "depth": 2,
+          "id": "mysql-database"
+        },
+        {
+          "title": "Publish our documentation",
+          "depth": 2,
+          "id": "publish-our-documentation"
+        }
+      ]
+    },
+    "4-samba.html": {
+      "source": "docs/4-samba.md",
+      "title": "Samba",
+      "slug": "4-samba",
+      "headings": [
+        {
+          "title": "Install",
+          "depth": 2,
+          "id": "install"
+        },
+        {
+          "title": "Create a Samba user",
+          "depth": 2,
+          "id": "create-a-samba-user"
+        },
+        {
+          "title": "Connect and mount CIFS",
+          "depth": 2,
+          "id": "connect-and-mount-cifs"
+        }
+      ]
+    },
+    "5-mail.html": {
+      "source": "docs/5-mail.md",
+      "title": "Mail",
+      "slug": "5-mail",
+      "headings": [
+        {
+          "title": "Install and send to local users",
+          "depth": 2,
+          "id": "install-and-send-to-local-users",
+          "headings": [
+            {
+              "title": "Installing and testing postfix",
+              "depth": 3,
+              "id": "installing-and-testing-postfix"
+            },
+            {
+              "title": "Using an alias",
+              "depth": 3,
+              "id": "using-an-alias"
+            },
+            {
+              "title": "Setting up MX records",
+              "depth": 3,
+              "id": "setting-up-mx-records"
+            }
+          ]
+        },
+        {
+          "title": "Authentication Setup and Virtual Users",
+          "depth": 2,
+          "id": "authentication-setup-and-virtual-users",
+          "headings": [
+            {
+              "title": "Add authentication to postfix",
+              "depth": 3,
+              "id": "add-authentication-to-postfix"
+            }
+          ]
+        }
+      ]
+    },
+    "6-nagios.html": {
+      "source": "docs/6-nagios.md",
+      "title": "Nagios",
+      "slug": "6-nagios",
+      "headings": [
+        {
+          "title": "Installing",
+          "depth": 2,
+          "id": "installing"
+        },
+        {
+          "title": "Contact information",
+          "depth": 2,
+          "id": "contact-information"
+        },
+        {
+          "title": "Configuring remote inspection",
+          "depth": 2,
+          "id": "configuring-remote-inspection"
+        },
+        {
+          "title": "Configuring \"Apache\" service",
+          "depth": 2,
+          "id": "configuring-\"apache\"-service"
+        },
+        {
+          "title": "Configuring \"ldap\" service",
+          "depth": 2,
+          "id": "configuring-\"ldap\"-service"
+        },
+        {
+          "title": "Defining dependencies",
+          "depth": 2,
+          "id": "defining-dependencies"
+        }
+      ]
+    }
+  },
+  "sources": {
+    "README.md": "index.html",
+    "docs/1-dns.md": "1-dns.html",
+    "docs/2-ldap.md": "2-ldap.html",
+    "docs/3-apache.md": "3-apache.html",
+    "docs/4-samba.md": "4-samba.html",
+    "docs/5-mail.md": "5-mail.html",
+    "docs/6-nagios.md": "6-nagios.html"
+  }
+}

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="assets/style.css?t=a44c9e9d">
+    <script src="assets/script.js?t=820b7ffa"></script>
+    <title>Apache</title>
+    <meta name="viewport" content="width=device-width">
+  </head>
+  <body class="-menu-visible">
+    <div class="doc-layout">
+      <div class="toggle menu-toggle js-menu-toggle"></div>
+      <div class="body page-3-apache">
+        <div class="header-nav">
+          <div class="right">
+          </div>
+        </div>
+        <div class="markdown-body"><h1 id="apache">Apache</h1>
+<h2 id="installing">Installing</h2>
+<pre><code class="lang-bash">aptitude install apache2
+</code></pre>
+<p>Upon visiting <a href="http://sdi5b.mi.hdm-stuttgart.de/">http://sdi5b.mi.hdm-stuttgart.de/</a> we are greeted with the apache default welcome page. When changing the file <code>/var/www/html/index.html</code>, the page content changes.</p>
+<h2 id="installing-documentation">Installing documentation</h2>
+<pre><code class="lang-bash">aptitude install apache2-doc
+</code></pre>
+<p>To find out where we can access our freshly installed documentation, we run <code>dpkg</code> to list all files installed by the package.</p>
+<pre><code class="lang-bash">dpkg -L apache2-doc | less
+</code></pre>
+<p>There we look for apache configuration files and find <code>/etc/apache2/conf-available/apache2-doc.conf</code>, which includes an <code>Alias</code> from <code>/manual</code> to the directory of the manuals. Now we know, that we can access the manuals from <a href="http://sdi5b.mi.hdm-stuttgart.de/manual">http://sdi5b.mi.hdm-stuttgart.de/manual</a>.</p>
+<h2 id="configuring-our-own-alias">Configuring our own alias</h2>
+<p>We want to be able to call <a href="http://sdi5b.mi.hdm-stuttgart.de/xyz123">http://sdi5b.mi.hdm-stuttgart.de/xyz123</a> and access the directory <code>/home/sdidoc</code> where we uploaded our documentation.</p>
+<p>We need to place a configuration file setting up the alias <code>/etc/apache2/conf-enabled/sdidoc.conf</code>:</p>
+<pre><code class="lang-aconf">Alias /xyz123 /home/sdidoc
+
+&lt;Directory &quot;/home/sdidoc&quot;&gt;
+    Options Indexes FollowSymlinks
+    AllowOverride None
+    Require all granted
+    AddDefaultCharset off
+&lt;/Directory&gt;
+</code></pre>
+<h2 id="virtual-hosts">Virtual hosts</h2>
+<p>When we configure our client machine to use our (private) nameserver we want to be able to call <a href="http://xyz123.mi.hdm-stuttgart.de">http://xyz123.mi.hdm-stuttgart.de</a> and reach our documentation.</p>
+<p>We define two DNS aliases <code>xy123</code> and <code>manual</code> for our virtual machine in <code>/etc/bind/zones/db.mi.hdm-stuttgart.de</code>:</p>
+<pre><code>...
+manual.mi.hdm-stuttgart.de.    IN    CNAME    ns5.mi.hdm-stuttgart.de.
+xyz123.mi.hdm-stuttgart.de.    IN    CNAME    ns5.mi.hdm-stuttgart.de.
+</code></pre>
+<p>Let&apos;s define the following vhosts in <code>/etc/apache2/sites-enabled/vhosts.conf</code> to link our subdomains to the directories the files live in:</p>
+<pre><code class="lang-aconf">&lt;VirtualHost *:80&gt;
+  ServerName xyz123.mi.hdm-stuttgart.de
+  DocumentRoot /home/sdidoc
+&lt;/VirtualHost&gt;
+
+&lt;VirtualHost *:80&gt;
+  ServerName manual.mi.hdm-stuttgart.de
+  DocumentRoot /usr/share/doc/apache2-doc/manual
+&lt;/VirtualHost&gt;
+</code></pre>
+<p>To apply the configuration we have to restart the services:</p>
+<pre><code class="lang-bash">service <span class="pl-c1">bind</span>9 reload
+service apache2 reload
+</code></pre>
+<p>To test that everything works (without <s>fun</s> VPN problems) we connect via SSH  using the <code>-Y</code> flag to our second server. On the server, we set the nameserver to our first server in the <code>/etc/resolv.conf</code>. Now we can start <code>iceweasel</code> and connect to one of our newly configured subdomains. Seeing our web pages verifies that the DNS setting is correct.</p>
+<h2 id="ssl-tls-support">SSL / TLS Support</h2>
+<p>First off, we make sure OpenSSL is installed and create an own certificate authority (CA).</p>
+<pre><code class="lang-bash">apt-get install openssl
+/usr/lib/ssl/misc/CA.pl -newca
+</code></pre>
+<p>Just follow the dialogue, but note that the following fields are mandatory:</p>
+<ul>
+<li>PEM pass phrase (4+ characters)</li>
+<li>Common Name, which has to match the URL you later want see in the browser</li>
+<li>Passphrase for <code>cakey.pem</code></li>
+</ul>
+<pre><code class="lang-bash"><span class="pl-c"># Generate a key for our server</span>
+openssl genrsa -out /etc/ssl/private/apache.key 2048
+
+<span class="pl-c"># Generate a certificate for our server</span>
+openssl req -new -x509 -key /etc/ssl/private/apache.key -days 365 -sha256 -out /etc/ssl/certs/apache.crt
+</code></pre>
+<p>Now update the virtual hosts file <code>/etc/apache2/sites-enabled/vhosts.conf</code> to actually use the certficate.</p>
+<pre><code class="lang-aconf">&lt;VirtualHost *:443&gt;
+  ServerName manual.mi.hdm-stuttgart.de
+  DocumentRoot /usr/share/doc/apache2-doc/manual
+
+  SSLEngine On
+  SSLCertificateFile /etc/ssl/certs/apache.crt
+  SSLCertificateKeyFile /etc/ssl/private/apache.key
+&lt;/VirtualHost&gt;
+</code></pre>
+<h2 id="ldap-authentication">LDAP authentication</h2>
+<p>We can limit access to directories / virtual hosts using LDAP users as well. To enable this, we simply have to add the following to a virtual host in <code>/etc/apache2/sites-enabled/vhosts.conf</code>:</p>
+<pre><code class="lang-aconf">&lt;VirtualHost *:80&gt;
+  ...
+  
+  Require valid-user
+  AuthName &quot;Private&quot;
+  AuthType Basic
+  AuthBasicProvider ldap
+  AuthLDAPURL ldap://sdi5b.mi.hdm-stuttgart.de/dc=betrayer,dc=com
+&lt;/VirtualHost&gt;
+</code></pre>
+<h2 id="mysql-database">MySQL Database</h2>
+<p>We want to run a MySQL database to run alongside our Apache server, as well as Adminer to manage it. First, we install the MySQL server, answering &quot;Yes&quot; to all questions.</p>
+<pre><code class="lang-bash">apt-get install mysql-server
+sudo mysql_install_db
+sudo /usr/bin/mysql_secure_installation
+</code></pre>
+<p>Since Adminer runs on PHP, we have to install an extension for PHP to speak with the MySQL database:</p>
+<pre><code class="lang-bash">apt-get install php5-mysqlnd
+service apache2 restart
+</code></pre>
+<p>Lastly, we install Adminer, which is just downloading a single PHP file into a target directory.</p>
+<pre><code class="lang-bash">curl https://www.adminer.org/static/download/4.2.5/adminer-4.2.5-mysql.php &gt; adminer/index.php
+</code></pre>
+<p>Now, we can visit <a href="http://sdi5b.mi.hdm-stuttgart.de/adminer">http://sdi5b.mi.hdm-stuttgart.de/adminer</a> and see the Adminer interface greet us, where we can log in with the database credentials.</p>
+<h2 id="publish-our-documentation">Publish our documentation</h2>
+<p>Since we host our documentation on Github, we just create a HTML page linking there in the required directory:</p>
+<pre><code class="lang-bash">mkdir -p /var/www/html/doc
+nano /var/www/html/doc/index.html
+</code></pre>
+<p>This will show up under the URL <a href="http://sdi5b.mi.hdm-stuttgart.de/doc/">http://sdi5b.mi.hdm-stuttgart.de/doc/</a>.</p>
+
+        </div>
+        <div class="footer-nav">
+          <div class="left"><a href="2-ldap.html"><span class="title">LDAP</span></a></div>
+          <div class="right"><a href="4-samba.html"><span class="label">Next: </span><span class="title">Samba</span></a></div>
+        </div>
+      </div>
+      <div class="menu toc-menu">
+        <li class="menu-item -level-0 -parent">
+          <ul class="submenu">
+            <li class="menu-item -level-1"><a href="index.html" class="link title  link-index">SDI</a>
+            </li>
+            <li class="menu-item -level-1"><a href="1-dns.html" class="link title  link-1-dns">DNS</a>
+            </li>
+            <li class="menu-item -level-1"><a href="2-ldap.html" class="link title  link-2-ldap">LDAP</a>
+            </li>
+            <li class="menu-item -level-1"><a href="3-apache.html" class="link title -active link-3-apache">Apache</a>
+              <ul class="headings heading-list">
+                <li class="heading-item -depth-2"><a href="#installing" class="hlink link-installing">Installing</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#installing-documentation" class="hlink link-installing-documentation">Installing documentation</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#configuring-our-own-alias" class="hlink link-configuring-our-own-alias">Configuring our own alias</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#virtual-hosts" class="hlink link-virtual-hosts">Virtual hosts</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#ssl-tls-support" class="hlink link-ssl-tls-support">SSL / TLS Support</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#ldap-authentication" class="hlink link-ldap-authentication">LDAP authentication</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#mysql-database" class="hlink link-mysql-database">MySQL Database</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#publish-our-documentation" class="hlink link-publish-our-documentation">Publish our documentation</a>
+                </li>
+              </ul>
+            </li>
+            <li class="menu-item -level-1"><a href="4-samba.html" class="link title  link-4-samba">Samba</a>
+            </li>
+            <li class="menu-item -level-1"><a href="5-mail.html" class="link title  link-5-mail">Mail</a>
+            </li>
+            <li class="menu-item -level-1"><a href="6-nagios.html" class="link title  link-6-nagios">Nagios</a>
+            </li>
+          </ul>
+        </li>
+      </div>
+    </div>
+  </body>
+</html>

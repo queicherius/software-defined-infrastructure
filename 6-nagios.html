@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="assets/style.css?t=a44c9e9d">
+    <script src="assets/script.js?t=820b7ffa"></script>
+    <title>Nagios</title>
+    <meta name="viewport" content="width=device-width">
+  </head>
+  <body class="-menu-visible">
+    <div class="doc-layout">
+      <div class="toggle menu-toggle js-menu-toggle"></div>
+      <div class="body page-6-nagios">
+        <div class="header-nav">
+          <div class="right">
+          </div>
+        </div>
+        <div class="markdown-body"><h1 id="nagios">Nagios</h1>
+<h2 id="installing">Installing</h2>
+<p>Our goal is to monitor the services of an application server using a different monitoring server. First, we have to install Nagios on the monitoring server. This will ask for a password for the <code>nagiosadmin</code> user.</p>
+<pre><code class="lang-bash">apt install nagios3 nagios-nrpe-plugin
+</code></pre>
+<p>You should now be able to call <a href="http://monitoringserver.ip/nagios3">http://monitoringserver.ip/nagios3</a> and see the Nagios dashboard, showing one host (the monitoring server itself) as running.</p>
+<p>Then, we have to install the nrpe server on the application server. This allows the monitoring server to communicate remotely with the application server later on.</p>
+<pre><code class="lang-bash">apt install nagios-nrpe-server
+</code></pre>
+<h2 id="contact-information">Contact information</h2>
+<p>To get noticiations, we have to update the default user in <code>/etc/nagios3/conf.d/contacts_nagios2.cfg</code>:</p>
+<pre><code class="lang-aconf">define contact {
+  contact_name            YourName
+  email                   your-mail@your.provider
+  # ...
+}
+
+# ...
+
+define contactgroup{
+  contactgroup_name       admins
+  alias                   Nagios Administrators
+  members                 YourName
+}
+</code></pre>
+<p>You can check if your configuration is valid using <code>nagios3 -v /etc/nagios3/nagios.cfg</code>. After confirming everything looks okay, we can apply the configuration with <code>service nagios3 reload</code>.</p>
+<p>To enable email notifications, nagios requires to add the following to <code>/etc/postfix/main.cf</code>:</p>
+<pre><code>strict_rfc821_envelopes = yes
+</code></pre>
+<h2 id="configuring-remote-inspection">Configuring remote inspection</h2>
+<p>To add a new host, we copy the local configuration into a new configuration file for that server:</p>
+<pre><code class="lang-bash">cp /etc/nagios3/conf.d/localhost_nagios2.cfg /etc/nagios3/conf.d/server02.cfg
+</code></pre>
+<p>Then we update the <code>host_name</code> everywhere to the hostname of the application server (in this case <code>sdi5b</code>) and update the <code>address</code> to match the IP address of the application server (in this case <code>141.62.75.112</code>).</p>
+<pre><code class="lang-aconf">define host {
+  use                     generic-host
+  host_name               sdi5b
+  alias                   localhost
+  address                 141.62.75.112
+  check_interval          1
+}
+
+# Check the available disk space
+define service{
+  use                     generic-service
+  host_name               sdi5b
+  service_description     Disk Space
+  check_command           check_all_disks!20%!10%
+}
+
+# Check the number of currently logged in users
+define service{
+  use                     generic-service
+  host_name               sdi5b
+  service_description     Current Users
+  check_command           check_users!20!50
+}
+
+# Check the number of currently running processes
+define service{
+  use                     generic-service
+  host_name               sdi5b
+  service_description     Total Processes
+  check_command           check_procs!250!400
+}
+
+# Check the load
+define service{
+  use                     generic-service
+  host_name               sdi5b
+  service_description     Current Load
+  check_command           check_load!5.0!4.0!3.0!10.0!6.0!4.0
+}
+</code></pre>
+<p>We can apply the configuration once again with <code>service nagios3 reload</code>. After checking the tactical overview, we can see that the additional host is up. Clicking on the detail view, we can confirm the service status for load, users, disk space and processes on the application server as <code>OK</code>.</p>
+<h2 id="configuring-&quot;apache&quot;-service">Configuring &quot;Apache&quot; service</h2>
+<p>Now we want to monitor the status of the Apache service on the application server (and while we&apos;re at it, monitor SSH as well). We define new services for that in the <code>/etc/nagios3/conf.d/server02.cfg</code> configuration file:</p>
+<pre><code class="lang-aconf"># Check that Apache is running
+define service {
+  use                     generic-service
+  host_name               sdi5b
+  service_description     Apache HTTP
+  check_command           check_http
+}
+
+# Check that SSH is running
+define service {
+  use                     generic-service
+  host_name               sdi5b
+  service_description     SSH
+  check_command           check_ssh
+}
+</code></pre>
+<p>We can apply the configuration once again with <code>service nagios3 reload</code>. After checking the overview, we can see the HTTP and SSH service appear as <code>PENDING</code> and then switch to <code>OK</code>. When shutting down Apache on the application server, the service status for Apache switches to <code>CRITICAL</code>.</p>
+<h2 id="configuring-&quot;ldap&quot;-service">Configuring &quot;ldap&quot; service</h2>
+<p>Now we want to monitor that LDAP based HTTPS authentication, as well as the LDAP server in general, is functional on the application server. We define new services for that in the <code>/etc/nagios3/conf.d/server02.cfg</code> configuration file:</p>
+<pre><code class="lang-aconf"># Check if remote LDAP authentication with https works
+define command {
+  command_name            check_http
+  command_line            check_http -u $ARG1$ -S -a $ARG2$
+}
+
+define service {
+  use                     generic-service
+  host_name               sdi5b
+  service_description     LDAP Authentication
+  check_command           check_http!/our-ldap-secured-path!username:password
+}
+
+# Check if the internally accessible LDAP server is running
+define command {
+  command_name            check_ldap
+  command_line            check_ldap -H $HOSTADDRESS$ -b $ARG1$ -D $ARG2$ -P $ARG3$
+}
+
+define service {
+  use                     generic-service
+  host_name               sdi5b
+  service_description     LDAP Server
+  check_command           check_ldap!dc=betrayer,dc=com!cn=admin,dc=betrayer,dc=com!123
+}
+</code></pre>
+<h2 id="defining-dependencies">Defining dependencies</h2>
+<p>Since LDAP authentication will not work when the monitoring server&apos;s LDAP server is down, authentication related warnings should be deferred until LDAP becomes available. We can configure that defining a Nagios dependency:</p>
+<pre><code class="lang-aconf">define servicedependency {
+  host_name                      sdi5b
+  service_description            LDAP Authentication
+  dependent_host_name            sdi5b
+  dependent_service_description  LDAP Server
+}
+</code></pre>
+
+        </div>
+        <div class="footer-nav">
+          <div class="left"><a href="5-mail.html"><span class="title">Mail</span></a></div>
+        </div>
+      </div>
+      <div class="menu toc-menu">
+        <li class="menu-item -level-0 -parent">
+          <ul class="submenu">
+            <li class="menu-item -level-1"><a href="index.html" class="link title  link-index">SDI</a>
+            </li>
+            <li class="menu-item -level-1"><a href="1-dns.html" class="link title  link-1-dns">DNS</a>
+            </li>
+            <li class="menu-item -level-1"><a href="2-ldap.html" class="link title  link-2-ldap">LDAP</a>
+            </li>
+            <li class="menu-item -level-1"><a href="3-apache.html" class="link title  link-3-apache">Apache</a>
+            </li>
+            <li class="menu-item -level-1"><a href="4-samba.html" class="link title  link-4-samba">Samba</a>
+            </li>
+            <li class="menu-item -level-1"><a href="5-mail.html" class="link title  link-5-mail">Mail</a>
+            </li>
+            <li class="menu-item -level-1"><a href="6-nagios.html" class="link title -active link-6-nagios">Nagios</a>
+              <ul class="headings heading-list">
+                <li class="heading-item -depth-2"><a href="#installing" class="hlink link-installing">Installing</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#contact-information" class="hlink link-contact-information">Contact information</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#configuring-remote-inspection" class="hlink link-configuring-remote-inspection">Configuring remote inspection</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#configuring-&quot;apache&quot;-service" class="hlink link-configuring-&quot;apache&quot;-service">Configuring &quot;Apache&quot; service</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#configuring-&quot;ldap&quot;-service" class="hlink link-configuring-&quot;ldap&quot;-service">Configuring &quot;ldap&quot; service</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#defining-dependencies" class="hlink link-defining-dependencies">Defining dependencies</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </div>
+    </div>
+  </body>
+</html>

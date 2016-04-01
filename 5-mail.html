@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="assets/style.css?t=a44c9e9d">
+    <script src="assets/script.js?t=820b7ffa"></script>
+    <title>Mail</title>
+    <meta name="viewport" content="width=device-width">
+  </head>
+  <body class="-menu-visible">
+    <div class="doc-layout">
+      <div class="toggle menu-toggle js-menu-toggle"></div>
+      <div class="body page-5-mail">
+        <div class="header-nav">
+          <div class="right">
+          </div>
+        </div>
+        <div class="markdown-body"><h1 id="mail">Mail</h1>
+<h2 id="install-and-send-to-local-users">Install and send to local users</h2>
+<h3 id="installing-and-testing-postfix">Installing and testing postfix</h3>
+<p>To send email, an email server is needed, so we are going to install <code>postfix</code> as a first step. We also add a user that we are going to use for testing email delivery.</p>
+<pre><code class="lang-bash">apt-get install postfix
+adduser mailuser <span class="pl-c"># we use &quot;123&quot; as a password here</span>
+</code></pre>
+<p>Now that we have an email server, let&apos;s check if it is up and running using telnet to connect to it:</p>
+<pre><code class="lang-bash">telnet localhost 25
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> To exit postfix, you have to enter the &quot;escape character&quot; it shows at the start. In the default case that is <code>^]</code>, which means <code>CTRL + ]</code>. After that type <code>quit</code> to exit telnet.</p>
+</blockquote>
+<p>Connected to the postfix server we can send an email to our test user:</p>
+<ol>
+<li><code>mail from:&lt;email@domain.com&gt;</code></li>
+<li><code>rcpt to:mailuser</code></li>
+<li><code>data</code></li>
+<li><code>subject:Some email subject</code></li>
+<li><code>Text for email body</code> (end the body with a <code>.</code> on an empty line)</li>
+</ol>
+<p>If everything is configured and working correctly, the mail should show up for the user:</p>
+<pre><code class="lang-bash">cat /var/mail/mailuser
+</code></pre>
+<h3 id="using-an-alias">Using an alias</h3>
+<p>We can also setup an alias for our mail user to which we can send mail as well:</p>
+<pre><code class="lang-bash">nano /etc/aliases
+<span class="pl-c"># myalias:mailuser</span>
+newaliases
+
+<span class="pl-c"># -&gt; rcpt to:myalias</span>
+</code></pre>
+<h3 id="setting-up-mx-records">Setting up MX records</h3>
+<p>We want to use the server as the mail server for our local machine, so first we have to specify an <code>MX</code> record in the DNS settings of the server (<code>/etc/bind/zones/db.mi.hdm-stuttgart.de</code>):</p>
+<pre><code>        IN      MX      ns5.mi.hdm-stuttgart.de.
+sdi5a   IN      A       ns5.mi.hdm-stuttgart.de.
+sdi5b   IN      A       141.62.75.112
+</code></pre>
+<p>This <code>MX</code> record has to point to a valid <code>A</code> record previously defined. In our case, we are using the same <code>A</code> record as for the nameserver settings. Also the &quot;subdomain&quot; we are using for emails has to be a correct <code>A</code> record as well.</p>
+<blockquote>
+<p><strong>Note:</strong> The bottom <code>A</code> record is not necessary for local testing since the record for the local hostname is already defined in the <code>/etc/hosts</code>, but we need it later.</p>
+</blockquote>
+<p>We also have to configure postfix to accept to allow for remote connections from any host (<code>/etc/postfix/main.cf</code>):</p>
+<pre><code class="lang-aconf"># remove &quot;mynetworks&quot;
+inet_interfaces = all
+myhostname = sid5b.mi.hdm-stuttgart.de
+mydestination # add &quot;mi.hdm-stuttgart.de&quot;
+</code></pre>
+<p>After restarting postfix (<code>service postfix restart</code>), we can connect from our local machine to the server using telnet:</p>
+<pre><code class="lang-bash">telnet serverip 25
+</code></pre>
+<blockquote>
+<p><strong>Note</strong>: When trying to send email from one server to another a <code>relay access denied</code> error pops up. This is because we are trying to send a mail from outside the network to a domain that our server is not authoritative for, thus the receive connector does not grant us the permission for sending/relaying.</p>
+</blockquote>
+<h2 id="authentication-setup-and-virtual-users">Authentication Setup and Virtual Users</h2>
+<h3 id="add-authentication-to-postfix">Add authentication to postfix</h3>
+<p>To authenticate users for sending emails, we need a <a href="https://en.wikipedia.org/wiki/Simple_Authentication_and_Security_Layer">sasl</a> implementation, in our case, we chose <a href="http://www.dovecot.org/">dovecot</a>:</p>
+<pre><code class="lang-bash">apt-get install dovecot-imapd dovecot-pop3
+</code></pre>
+<p>Now, we have to configure dovecot to listen on the correct protocols (<code>/etc/dovecot/dovecot.conf</code>):</p>
+<pre><code class="lang-aconf"># uncomment &quot;listen&quot;
+protocol = pop3 imap
+</code></pre>
+<p>However, remote login via telnet with password is disabled by default, so we enable plaintext authentication in the <code>/etc/dovcot/conf.d/10-auth.conf</code>:</p>
+<pre><code class="lang-aconf">disable_plaintext_auth = no
+</code></pre>
+<p>After restarting dovecot (<code>service dovecot restart</code>) we can connect authenticated:</p>
+<pre><code class="lang-bash">telnet localhost 142
+a login <span class="pl-s">&quot;mailuser&quot;</span> <span class="pl-s">&quot;123&quot;</span> <span class="pl-c"># -&gt; a OK</span>
+</code></pre>
+<p>To connect dovecot with postfix, we setup the unix listener in <code>/etc/dovecot/conf.d/10-master.conf</code>:</p>
+<pre><code class="lang-aconf">unix_listener /var/spool/postfix/private/auth {
+  mode = 0666
+  user = postfix
+}
+</code></pre>
+<p>We also connect postfix with dovecot using the configuration in <code>/etc/postfix/main.cf</code>:</p>
+<pre><code>smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination, permit
+smtpd_sasl_type = dovecot
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_path = private/auth
+</code></pre>
+<p>Now we can use our server in an email client (we used Thunderbird) and as a proof that everything is configured correctly send and receive emails (also from one server to another)!</p>
+
+        </div>
+        <div class="footer-nav">
+          <div class="left"><a href="4-samba.html"><span class="title">Samba</span></a></div>
+          <div class="right"><a href="6-nagios.html"><span class="label">Next: </span><span class="title">Nagios</span></a></div>
+        </div>
+      </div>
+      <div class="menu toc-menu">
+        <li class="menu-item -level-0 -parent">
+          <ul class="submenu">
+            <li class="menu-item -level-1"><a href="index.html" class="link title  link-index">SDI</a>
+            </li>
+            <li class="menu-item -level-1"><a href="1-dns.html" class="link title  link-1-dns">DNS</a>
+            </li>
+            <li class="menu-item -level-1"><a href="2-ldap.html" class="link title  link-2-ldap">LDAP</a>
+            </li>
+            <li class="menu-item -level-1"><a href="3-apache.html" class="link title  link-3-apache">Apache</a>
+            </li>
+            <li class="menu-item -level-1"><a href="4-samba.html" class="link title  link-4-samba">Samba</a>
+            </li>
+            <li class="menu-item -level-1"><a href="5-mail.html" class="link title -active link-5-mail">Mail</a>
+              <ul class="headings heading-list">
+                <li class="heading-item -depth-2"><a href="#install-and-send-to-local-users" class="hlink link-install-and-send-to-local-users">Install and send to local users</a>
+                  <ul class="heading-list -depth-2">
+                    <li class="heading-item -depth-3"><a href="#installing-and-testing-postfix" class="hlink link-installing-and-testing-postfix">Installing and testing postfix</a>
+                    </li>
+                    <li class="heading-item -depth-3"><a href="#using-an-alias" class="hlink link-using-an-alias">Using an alias</a>
+                    </li>
+                    <li class="heading-item -depth-3"><a href="#setting-up-mx-records" class="hlink link-setting-up-mx-records">Setting up MX records</a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="heading-item -depth-2"><a href="#authentication-setup-and-virtual-users" class="hlink link-authentication-setup-and-virtual-users">Authentication Setup and Virtual Users</a>
+                  <ul class="heading-list -depth-2">
+                    <li class="heading-item -depth-3"><a href="#add-authentication-to-postfix" class="hlink link-add-authentication-to-postfix">Add authentication to postfix</a>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li class="menu-item -level-1"><a href="6-nagios.html" class="link title  link-6-nagios">Nagios</a>
+            </li>
+          </ul>
+        </li>
+      </div>
+    </div>
+  </body>
+</html>

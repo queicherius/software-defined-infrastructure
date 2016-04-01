@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="assets/style.css?t=a44c9e9d">
+    <script src="assets/script.js?t=820b7ffa"></script>
+    <title>LDAP</title>
+    <meta name="viewport" content="width=device-width">
+  </head>
+  <body class="-menu-visible">
+    <div class="doc-layout">
+      <div class="toggle menu-toggle js-menu-toggle"></div>
+      <div class="body page-2-ldap">
+        <div class="header-nav">
+          <div class="right">
+          </div>
+        </div>
+        <div class="markdown-body"><h1 id="ldap">LDAP</h1>
+<h2 id="browse-an-existing-ldap-server">Browse an existing LDAP server</h2>
+<blockquote>
+<p><strong>Note:</strong> The following instructions assume the network of the server being public or being connected using a VPN</p>
+</blockquote>
+<p>Connecting anonymously to an existing server with <a href="https://directory.apache.org/studio/">Apache Directory Studio</a> can be easily achieved by adding a new connection with:</p>
+<ul>
+<li><strong>Network Parameter</strong>
+<ul>
+<li><em>Hostname:</em> <a href="http://ldap1.mi.hdm-stuttgart.de">ldap1.mi.hdm-stuttgart.de</a></li>
+<li><em>Port:</em> 389</li>
+<li><em>Encryption Method:</em> SSL (<code>ldaps://</code>)</li>
+</ul>
+</li>
+</ul>
+<p>When connecting as a authenticated user (in this case <code>dr044</code>) the following settings have to be set too:</p>
+<ul>
+<li><strong>Authentication</strong>
+<ul>
+<li><em>Authentication Method:</em> Simple authentication</li>
+<li><em>Bind DN:</em> <code>uid=dr044,ou=userlist,dc=hdm-stuttgart,dc=de</code></li>
+<li><em>Bind Password:</em> *****</li>
+</ul>
+</li>
+</ul>
+<p>When connecting as a authenticated user, there is the permission to read more information as when connecting anonymously. In this case, the  enrollment number can be read.</p>
+<h2 id="set-up-an-openldap-server">Set up an OpenLDAP server</h2>
+<p>We start off by installing <code>sladp</code> and its prerequisite <code>dialog</code>. While installing, the administrator password gets set in a dialogue box.</p>
+<pre><code class="lang-bash">aptitude install dialog
+aptitude install slapd
+</code></pre>
+<p>Now, we can configure the server directory information tree (<code>betrayer.com</code>), distinguished name (<code>betrayer.com</code>), administrator password (<code>123</code>) and database type (<code>MDB</code>) with running the following command:</p>
+<pre><code class="lang-bash">dpkg-reconfigure slapd
+</code></pre>
+<h2 id="populating-your-dit">Populating your DIT</h2>
+<p>First, we connect to our new LDAP server with Apache Directory Studio, using the &quot;admin&quot; credentials we created in the previous step.</p>
+<ul>
+<li><strong>Network Parameter</strong>
+<ul>
+<li><em>Hostname:</em> <a href="http://sdi5b.mi.hdm-stuttgart.de">sdi5b.mi.hdm-stuttgart.de</a></li>
+<li><em>Port:</em> 389</li>
+<li><em>Encryption Method:</em> None</li>
+</ul>
+</li>
+<li><strong>Authentication</strong>
+<ul>
+<li><em>Authentication Method:</em> Simple authentication</li>
+<li><em>Bind DN:</em> <code>cn=admin,dc=betrayer,dc=com</code></li>
+<li><em>Bind Password:</em> 123</li>
+</ul>
+</li>
+</ul>
+<p>We can add new organisational units using the context menu on the <code>dc=betrayer,dc=com</code> node and choose &quot;New&quot; &gt; &quot;New Entry&quot;. We create an &quot;Entry from Scratch&quot; and use the <code>oganisationalUnit</code> and <code>uidObject</code> object classes. In the dialogue asking for the RDN, we choose the parent (which can be the root node OR another organisational unit) and set <code>ou = development</code>. After that, we only have to specify a uid in the following dialogue.</p>
+<p>To add a new user, we can use the context menu on an organisational unit and choose &quot;New&quot; &gt; &quot;New Entry&quot; as well. We choose &quot;Entry from Scratch&quot; and use the <code>inetOrgPerson</code> and <code>uidObject</code> object classes. We set the RDN to <code>uid = smith</code>. After that, we can add more attributes, like <code>mail</code>, <code>userPassowrd</code>, <code>givenName</code>, ... in the following dialogue.</p>
+<p>After exporting the root node using &quot;Export&quot; &gt; &quot;LDIF Export&quot; and specifying the search base to our root node, we get the following example structure:</p>
+<pre><code>version: 1
+
+dn: dc=betrayer,dc=com
+objectClass: organization
+objectClass: dcObject
+objectClass: top
+dc: betrayer
+o: betrayer.com
+
+dn: cn=admin,dc=betrayer,dc=com
+objectClass: organizationalRole
+objectClass: simpleSecurityObject
+cn: admin
+userPassword:: e1NTSEF9Mkl3b29JTUhzeVJRWUpWNHVKOW9ZOFpZQndhb1EweFk=
+description: LDAP administrator
+
+dn: ou=departments,dc=betrayer,dc=com
+objectClass: uidObject
+objectClass: top
+objectClass: organizationalUnit
+ou: departments
+uid: departments
+
+dn: ou=software,ou=departments,dc=betrayer,dc=com
+objectClass: uidObject
+objectClass: top
+objectClass: organizationalUnit
+ou: software
+uid: software
+
+dn: ou=financial,ou=departments,dc=betrayer,dc=com
+objectClass: uidObject
+objectClass: top
+objectClass: organizationalUnit
+ou: financial
+uid: financial
+
+dn: ou=development,ou=departments,dc=betrayer,dc=com
+objectClass: uidObject
+objectClass: top
+objectClass: organizationalUnit
+ou: development
+uid: development
+
+dn: ou=testing,ou=departments,dc=betrayer,dc=com
+objectClass: uidObject
+objectClass: top
+objectClass: organizationalUnit
+ou: testing
+uid: testing
+
+dn: uid=smith,ou=software,ou=departments,dc=betrayer,dc=com
+objectClass: uidObject
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Jim Smith
+sn: Smith
+uid: smith
+givenName: Jim
+mail: smith@betrayer.com
+userPassword:: e3NoYX1RTDBBRldNSVg4TlJaVEtlb2Y5Y1hzdmJ2dTg9
+</code></pre>
+<h2 id="testing-a-bind-operation-as-non-admin">Testing a bind operation as non-admin</h2>
+<p>We can now log in with the user we created in the previous step:</p>
+<ul>
+<li><strong>Network Parameter</strong>
+<ul>
+<li><em>Hostname:</em> <a href="http://sdi5b.mi.hdm-stuttgart.de">sdi5b.mi.hdm-stuttgart.de</a></li>
+<li><em>Port:</em> 389</li>
+<li><em>Encryption Method:</em> None</li>
+</ul>
+</li>
+<li><strong>Authentication</strong>
+<ul>
+<li><em>Authentication Method:</em> Simple authentication</li>
+<li><em>Bind DN:</em> <code>uid=smith,ou=software,ou=departments,dc=betrayer,dc=com</code></li>
+<li><em>Bind Password:</em> 456</li>
+</ul>
+</li>
+</ul>
+<p>That user can see the LDAP tree, but when adding a new entry the error <code>no write access to parent</code> gets thrown (as expected).</p>
+<h2 id="accessing-ldap-data-by-a-mail-client">Accessing LDAP data by a mail client</h2>
+<p>For our example, we are using Thunderbird:</p>
+<ol>
+<li>Open the &quot;Address Book&quot;</li>
+<li>&quot;File&quot; &gt; &quot;New&quot; &gt; &quot;LDAP Directory&quot;</li>
+<li>Enter the needed options:
+<ul>
+<li>&quot;Name&quot; can be any arbitrary name</li>
+<li>&quot;Host&quot; is <code>sdi5b.mi.hdm-stuttgart.de</code></li>
+<li>&quot;Base DN&quot; is <code>dc=betrayer,dc=com</code></li>
+<li>&quot;Port&quot; is the default <code>389</code></li>
+<li>&quot;Bind DN&quot; is <code>uid=smith,ou=software,ou=departments,dc=betrayer,dc=com</code></li>
+</ul>
+</li>
+</ol>
+<p>Now, when searching email addresses, we get asked for the user password and can see the emails in the LDAP server. We can also right-click on the new address book, choose &quot;Properties&quot; &gt; &quot;Offline&quot; and &quot;Download Now&quot; to download all available data for offline use.</p>
+<h2 id="ldap-configuration">LDAP configuration</h2>
+<p>We want to change our server so that we can change the configuration using the database instead of a file based system. First off, we start by collecting the data we need:</p>
+<pre><code>ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config
+</code></pre>
+<p>The output shows us that the user on the configuration database we want to use, doesn&apos;t have a password and therefore limits access to <code>localhost</code>:</p>
+<pre><code># {0}config, config
+olcRootDN: cn=admin,cn=config
+
+# {1}mdb, config
+olcRootDN: cn=admin,dc=betrayer,dc=com
+olcRootPW: {SSHA}2IwooIMHsyRQYJV4uJ9oY8ZYBwaoQ0xY
+</code></pre>
+<p>We create an <code>ldif</code> file with the changes (adding a password) we want to execute:</p>
+<pre><code>dn: olcDatabase={0}config,cn=config
+add: olcRootPW
+olcRootPW: {SSHA}2IwooIMHsyRQYJV4uJ9oY8ZYBwaoQ0xY
+</code></pre>
+<p>We can now send these changes to the database using the following command:</p>
+<pre><code>ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f add_olcRootPW.ldif
+</code></pre>
+<p>We can now connect using the new admin user, and change the backend configuration of the LDAP database via Apache Directory Studio:</p>
+<ul>
+<li><strong>Network Parameter</strong>
+<ul>
+<li><em>Hostname:</em> <a href="http://sdi5b.mi.hdm-stuttgart.de">sdi5b.mi.hdm-stuttgart.de</a></li>
+<li><em>Port:</em> 389</li>
+<li><em>Encryption Method:</em> None</li>
+</ul>
+</li>
+<li><strong>Authentication</strong>
+<ul>
+<li><em>Authentication Method:</em> Simple authentication</li>
+<li><em>Bind DN:</em> <code>cn=admin,cn=config</code></li>
+<li><em>Bind Password:</em> 123</li>
+</ul>
+</li>
+<li><strong>Browser Options</strong>
+<ul>
+<li>Untick &quot;Get base DNs from Root DSE&quot;</li>
+<li><em>Base DN:</em> <code>cn=config</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="filter-based-search">Filter based search</h2>
+<p>Using the context menu, we can choose &quot;Filter Children&quot; and filter the entries using their properties:</p>
+<ul>
+<li><code>(uid=b*)</code> for all entries where <code>uid</code> starts with <code>b</code></li>
+<li><code>(|(uid=*)(ou=d*))</code> for all entries where <code>uid</code> is set or <code>ou</code> starts with <code>d</code></li>
+</ul>
+<p>A full reference of the available filter options can be found <a href="http://social.technet.microsoft.com/wiki/contents/articles/5392.active-directory-ldap-syntax-filters.aspx">here</a>.</p>
+<h2 id="extending-an-existing-entry">Extending an existing entry</h2>
+<p>We want to add a <code>posixAccount</code> to the &quot;smith&quot; user and create a <code>ldif</code> file for it:</p>
+<pre><code># DN of the entry we want to modify
+dn: uid=smith,ou=software,ou=departments,dc=betrayer,dc=com
+
+# The change type of this file: changing an entry
+changetype: modify
+
+# For every object class and attribute, we have to
+# specify it first using &quot;add&quot; and then specifying it&apos;s value
+add: objectClass
+objectClass: posixAccount
+-
+add: gidNumber
+gidNumber: 3
+-
+add: uidNumber
+uidNumber: 7
+-
+add: homeDirectory
+homeDirectory: /usr/smith
+</code></pre>
+<p>Since we didn&apos;t set up SSL on our server, we need to remove the <code>-Q</code> parameter from the previous <code>ldapmodify</code> command and instead use the following command:</p>
+<pre><code>ldapmodify -x -H ldapi:/// -D &quot;cn=admin,dc=betrayer,dc=com&quot; -w &quot;123&quot; -f changeuser.ldif
+</code></pre>
+<h2 id="providing-web-based-user-management">Providing web-based user management</h2>
+<pre><code>aptitude install ldap-account-manager
+</code></pre>
+<p>After installing the account manager, we have to update the configuration file located under <code>/var/lib/ldap-account-manager/config/lam.conf</code>:</p>
+<pre><code>admins: cn=admin,dc=betrayer,dc=com
+treesuffix: dc=betrayer,dc=com
+</code></pre>
+<p>Now we can log into our web interface on <code>http://sdi5b.mi.hdm-stuttgart.de/lam</code> using the normal LDAP credentials <code>admin</code> and <code>123</code>. When we visit &quot;Tree view&quot;, we can see and modify the same tree as in Apache Directory Studio.</p>
+<h2 id="backup-and-recovery-restore">Backup and recovery / restore</h2>
+<p>We want to copy the data from one server to another. First, we export our data into a file using <code>slapcat</code>:</p>
+<pre><code>slapcat &gt; slap-backup
+</code></pre>
+<p>After copying the file to another server, we delete the database on the other server and run <code>slapadd</code> to import the exported data:</p>
+<pre><code>service slapd stop
+rm -rf /var/lib/ldap/*
+slapadd -l slap-backup
+service slapd start
+</code></pre>
+<p>We can now log into the other server and see our data copied over.</p>
+
+        </div>
+        <div class="footer-nav">
+          <div class="left"><a href="1-dns.html"><span class="title">DNS</span></a></div>
+          <div class="right"><a href="3-apache.html"><span class="label">Next: </span><span class="title">Apache</span></a></div>
+        </div>
+      </div>
+      <div class="menu toc-menu">
+        <li class="menu-item -level-0 -parent">
+          <ul class="submenu">
+            <li class="menu-item -level-1"><a href="index.html" class="link title  link-index">SDI</a>
+            </li>
+            <li class="menu-item -level-1"><a href="1-dns.html" class="link title  link-1-dns">DNS</a>
+            </li>
+            <li class="menu-item -level-1"><a href="2-ldap.html" class="link title -active link-2-ldap">LDAP</a>
+              <ul class="headings heading-list">
+                <li class="heading-item -depth-2"><a href="#browse-an-existing-ldap-server" class="hlink link-browse-an-existing-ldap-server">Browse an existing LDAP server</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#set-up-an-openldap-server" class="hlink link-set-up-an-openldap-server">Set up an OpenLDAP server</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#populating-your-dit" class="hlink link-populating-your-dit">Populating your DIT</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#testing-a-bind-operation-as-non-admin" class="hlink link-testing-a-bind-operation-as-non-admin">Testing a bind operation as non-admin</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#accessing-ldap-data-by-a-mail-client" class="hlink link-accessing-ldap-data-by-a-mail-client">Accessing LDAP data by a mail client</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#ldap-configuration" class="hlink link-ldap-configuration">LDAP configuration</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#filter-based-search" class="hlink link-filter-based-search">Filter based search</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#extending-an-existing-entry" class="hlink link-extending-an-existing-entry">Extending an existing entry</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#providing-web-based-user-management" class="hlink link-providing-web-based-user-management">Providing web-based user management</a>
+                </li>
+                <li class="heading-item -depth-2"><a href="#backup-and-recovery-restore" class="hlink link-backup-and-recovery-restore">Backup and recovery / restore</a>
+                </li>
+              </ul>
+            </li>
+            <li class="menu-item -level-1"><a href="3-apache.html" class="link title  link-3-apache">Apache</a>
+            </li>
+            <li class="menu-item -level-1"><a href="4-samba.html" class="link title  link-4-samba">Samba</a>
+            </li>
+            <li class="menu-item -level-1"><a href="5-mail.html" class="link title  link-5-mail">Mail</a>
+            </li>
+            <li class="menu-item -level-1"><a href="6-nagios.html" class="link title  link-6-nagios">Nagios</a>
+            </li>
+          </ul>
+        </li>
+      </div>
+    </div>
+  </body>
+</html>
