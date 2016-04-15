@@ -255,10 +255,25 @@ Now we can log into our web interface on `http://sdi5b.mi.hdm-stuttgart.de/lam` 
 
 ## Backup and recovery / restore
 
-// TODO
+We want to copy the data from one server to another. First, we export our data into a file using `slapcat`:
+
+```
+slapcat > slap-backup
+```
+
+After copying the file to another server, we delete the database on the other server and run `slapadd` to import the exported data:
+
+```
+service slapd stop
+rm -rf /var/lib/ldap/*
+slapadd -l slap-backup
+service slapd start
+```
+
+We can now log into the other server and see our data copied over.
 
 ## Replication
 
-// TODO
+[Click!](http://www.server-world.info/en/note?os=CentOS_6&p=ldap&f=8)
 
 ## Accessing LDAP by a Java™ application
