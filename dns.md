@@ -73,8 +73,8 @@ $TTL    604800
 
 ; name servers - A records
 ns5.mi.hdm-stuttgart.de.          IN      A       141.62.75.112
-www5_1.mi.hdm-stuttgart.de.       IN      CNAME   ns5.mi.hdm-stuttgart.de
-www5_2.mi.hdm-stuttgart.de.       IN      CNAME   ns5.mi.hdm-stuttgart.de
+www5_1.mi.hdm-stuttgart.de.       IN      CNAME   ns5.mi.hdm-stuttgart.de.
+www5_2.mi.hdm-stuttgart.de.       IN      CNAME   ns5.mi.hdm-stuttgart.de.
 ```
 
 Set up the reverse lookup zone (ip to hostname) in `/etc/bind/zones/db.141.62.75`
