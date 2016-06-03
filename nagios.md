@@ -128,20 +128,30 @@ We can apply the configuration once again with `service nagios3 reload`. After c
 Now we want to monitor that LDAP based https authentication as well as the LDAP server in general is functional on the application server. We define new services for that in the `/etc/nagios3/conf.d/server02.cfg` configuration file:
 
 ```
-# Check if remote LDAP authentication works
+# Check if remote LDAP authentication with https works
+define command {
+  command_name            check_http
+  command_line            check_http -u $ARG1$ -S -a $ARG2$
+}
+
 define service {
   use                     generic-service
   host_name               sdi5b
   service_description     LDAP Authentication
-  check_command           ?????? // TODO
+  check_command           check_http!/our-ldap-secured-path!username:password
 }
 
 # Check if the interally accessible LDAP server is running
+define command {
+  command_name            check_ldap
+  command_line            check_ldap -H $HOSTADDRESS$ -b $ARG1$ -D $ARG2$ -P $ARG3$
+}
+
 define service {
   use                     generic-service
   host_name               sdi5b
   service_description     LDAP Server
-  check_command           ?????? // TODO
+  check_command           check_ldap!dc=betrayer,dc=com!cn=admin,dc=betrayer,dc=com!123
 }
 ```
 
