@@ -63,7 +63,6 @@ define host {
   check_interval          1
 }
 
-
 # Check the available disk space
 define service{
   use                     generic-service
