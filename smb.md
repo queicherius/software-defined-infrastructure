@@ -58,3 +58,6 @@ mkdir mnt
 mount -t cifs  //sdi4a.mi.hdm-stuttgart.de/smbtester ~/mnt/ -ouser=smbtester
 ```
 
+## Samba and LDAP
+
+TODO
