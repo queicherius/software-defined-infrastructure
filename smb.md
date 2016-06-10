@@ -1,4 +1,6 @@
-# Install
+# Samba
+
+## Install
 ```sh
 apt-get install samba
 ```
@@ -11,7 +13,7 @@ smbpasswd -a smbtester
 ```
 
 
-# Create a Samba user
+## Create a Samba user
 
 Let's create a directory to share:
 
@@ -32,7 +34,7 @@ read only = no
 Now restart it: `service smbd restart` and test the settings via `testparm` if you like.
 
 
-# Connect and mount CIFS
+## Connect and mount CIFS
 
 Install the utilities:
 
