@@ -1,5 +1,7 @@
 # DNS
 
+> **Note:** If you are looking for the options of bind, [this website](http://www.zytrax.com/books/dns/ch7/statements.html) proved to be a good source of information.
+
 ## Installing bind
 
 Install the server and utilities.
@@ -20,7 +22,7 @@ Update the global options in `/etc/bind/named.conf.options`
 options {
   directory "/var/cache/bind";
 
-  // Enable recursive dns queries
+  // Disable recursive dns queries
   recursion no;
 
   // Listen on the private network only (local IP)
@@ -141,7 +143,28 @@ dig @141.62.75.112 spiegel.de
 
 ## Forwarders
 
-// TODO
+Due to the `recursion no` in the configuration, currently only queries regarding objects within the defined zones are supported. To enable forwarding to "real" DNS servers we configure the options in `/etc/bind/named.conf.options`.
+
+```
+options {
+  # ...
+  
+  # List of IP addresses to which queries will be forwarded
+  forwarders {
+    141.62.64.127;
+    141.62.64.128;
+    141.62.64.21;
+  };
+  
+  # Send the query the forwarders
+  forward first;
+  
+  # Allow for recursive queries from our non-secure DNS server
+  dnssec-enable no;
+  
+  # ...
+}
+```
 
 ## Mail exchange record
 
