@@ -11,4 +11,6 @@ cat smb.md >> full-document.md
 # cat mail.md >> full-document.md
 echo "\n\n" >> full-document.md
 cat nagios.md >> full-document.md
+echo "\n\n" >> full-document.md
+cat mail.md >> full-document.md
 scholdoc full-document.md > index.html
