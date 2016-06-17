@@ -89,7 +89,7 @@ apt-get install dovecot-imapd dovecot-pop3
 Now, we have to configure dovecot to listen on the correct protocols (`/etc/dovecot/dovecot.conf`):
 
 ```aconf
-# uncomment listen
+# uncomment "listen"
 protocol = pop3 imap
 ```
 
@@ -125,3 +125,7 @@ smtpd_sasl_path = private/auth
 ```
 
 Now we can use our server in a email client (we used Thunderbird) and as a proof that everything is configured correctly send and recieve emails (also from one server to another)!
+
+### Virtual users and our own domain
+
+// TODO
