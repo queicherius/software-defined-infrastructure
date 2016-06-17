@@ -2,7 +2,7 @@
 
 ## Installing
 
-```
+```bash
 aptitude install apache2
 ```
 
@@ -10,13 +10,13 @@ Upon visiting [http://sdi5b.mi.hdm-stuttgart.de/]() we are greeted with the apac
 
 ## Installing documentation
 
-```
+```bash
 aptitude install apache2-doc
 ```
 
 To find out where we can access our freshly installed documentation, we run `dpkg` to list all files installed by the package.
 
-```
+```bash
 dpkg -L apache2-doc | less
 ```
 
@@ -28,7 +28,7 @@ We want to be able to call [http://sdi5b.mi.hdm-stuttgart.de/xyz123]() and acces
 
 We need to place a configuration file setting up the alias `/etc/apache2/conf-enabled/sdidoc.conf`:
 
-```
+```aconf
 Alias /xyz123 /home/sdidoc
 
 <Directory "/home/sdidoc">
@@ -53,7 +53,7 @@ xyz123.mi.hdm-stuttgart.de.	IN	CNAME	ns5.mi.hdm-stuttgart.de.
 
 Let's define the following vhosts in `/etc/apache2/sites-enabled/vhosts.conf` to link our subdomains to the directories the files live in:
 
-```
+```aconf
 <VirtualHost *:80>
   ServerName xyz123.mi.hdm-stuttgart.de
   DocumentRoot /home/sdidoc
@@ -103,7 +103,7 @@ openssl req -new -x509 -key /etc/ssl/private/apache.key -days 365 -sha256 -out /
 
 Now update the virtual hosts file `/etc/apache2/sites-enabled/vhosts.conf` to actually use the certficate.
 
-```
+```aconf
 <VirtualHost *:443>
   ServerName manual.mi.hdm-stuttgart.de
   DocumentRoot /usr/share/doc/apache2-doc/manual
