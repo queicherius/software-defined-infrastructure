@@ -24,7 +24,7 @@ mkdir smbshare
 
 And make Samba aware of it by adding the following to the very end of `/etc/samba/smb.conf`:
 
-```sh
+```
 [smbshare]
 path = /home/smbtester/smbshare
 valid users = smbtester
@@ -41,7 +41,6 @@ Install the utilities:
 ```sh
 apt-get install cifs-utils # for mounting
 apt-get install smbclient # for command line access
-
 ```
 
 To connect via the command line:
