@@ -20,7 +20,7 @@ apt install nagios-nrpe-server
 
 To get noticiations, we have to update the default user in `/etc/nagios3/conf.d/contacts_nagios2.cfg`:
 
-```
+```aconf
 define contact {
   contact_name            YourName
   email                   your-mail@your.provider
@@ -54,7 +54,7 @@ cp /etc/nagios3/conf.d/localhost_nagios2.cfg /etc/nagios3/conf.d/server02.cfg
 
 Then we update the `host_name` everywhere to the hostname of the application server (in this case `sdi5b`) and update the `address` to match the ip adress of the application server (in this case `141.62.75.112`).
 
-```
+```aconf
 define host {
   use                     generic-host
   host_name               sdi5b
@@ -102,7 +102,7 @@ We can apply the configuration once again with `service nagios3 reload`. After c
 
 Now we want to monitor the status of the Apache service on the application server (and while we're at it, monitor SSH as well). We define new services for that in the `/etc/nagios3/conf.d/server02.cfg` configuration file:
 
-```
+```aconf
 # Check that Apache is running
 define service {
   use                     generic-service
@@ -126,7 +126,7 @@ We can apply the configuration once again with `service nagios3 reload`. After c
 
 Now we want to monitor that LDAP based https authentication as well as the LDAP server in general is functional on the application server. We define new services for that in the `/etc/nagios3/conf.d/server02.cfg` configuration file:
 
-```
+```aconf
 # Check if remote LDAP authentication with https works
 define command {
   command_name            check_http
@@ -158,7 +158,7 @@ define service {
 
 Since LDAP authentication will not work when the monitoring server's LDAP server is down, authentication related warnings should be deferred until LDAP becomes available. We can configure that defining a Nagios dependency:
 
-```
+```aconf
 define servicedependency {
   host_name                      sdi5b
   service_description            LDAP Authentication
