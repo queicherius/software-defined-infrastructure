@@ -18,25 +18,24 @@ OPTIONS="-4 -u bind"
 
 Update the global options in `/etc/bind/named.conf.options`
 
-```
+```aconf
 options {
   directory "/var/cache/bind";
 
-  // Disable recursive dns queries
+  # Disable recursive dns queries
   recursion no;
 
-  // Listen on the private network only (local IP)
+  # Listen on the private network only (local IP)
   listen-on { 141.62.75.112; };
 
-  // Disable zone transfers becaues we don't have a
-  // redundant infrastructure (primary / secondary dns)
+  # Disable zone transfers becaues we don't have a
+  # redundant infrastructure (primary / secondary dns)
   allow-transfer { none; };
 
-  // Currently we don't want to forward requests to stable nameservers
-  forwarders {
-  };
+  # Currently we don't want to forward requests to stable nameservers
+  forwarders {};
 
-  // Use the default settings for validation and ipv6
+  # Use the default settings for validation and ipv6
   dnssec-validation auto;
   auth-nxdomain no;
   listen-on-v6 { any; };
@@ -145,7 +144,7 @@ dig @141.62.75.112 spiegel.de
 
 Due to the `recursion no` in the configuration, currently only queries regarding objects within the defined zones are supported. To enable forwarding to "real" DNS servers we configure the options in `/etc/bind/named.conf.options`.
 
-```
+```aconf
 options {
   # ...
   
