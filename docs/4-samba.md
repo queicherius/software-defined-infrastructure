@@ -1,28 +1,30 @@
 # Samba
 
 ## Install
+
+First off, we install the Samba dependencies as usual:
+
 ```sh
 apt-get install samba
 ```
 
-Every Samba user needs to be a system user. Nonetheless, Samba passwords are handled separately and stored in `/etc/samba/smbpasswd`.
+Every Samba user needs to be a system user. Nonetheless, Samba passwords are handled separately and stored in `/etc/samba/smbpasswd`, so we're going to set up one there:
 
 ```sh
 adduser smbtester
 smbpasswd -a smbtester
 ```
 
-
 ## Create a Samba user
 
-Let's create a directory to share:
+As the first step, we create the directory we want to to share:
 
 ```sh
 cd
 mkdir smbshare
 ```
 
-And make Samba aware of it by adding the following to the very end of `/etc/samba/smb.conf`:
+Now we make Samba aware of it by adding the following to the very end of `/etc/samba/smb.conf`:
 
 ```
 [smbshare]
@@ -31,32 +33,27 @@ valid users = smbtester
 read only = no
 ```
 
-Now restart it: `service smbd restart` and test the settings via `testparm` if you like.
-
+Now we have to restart the service using `service smbd restart` and test can the settings via `testparm`.
 
 ## Connect and mount CIFS
 
-Install the utilities:
+First, we have to install the utilites for mouting and command line access:
 
 ```sh
-apt-get install cifs-utils # for mounting
-apt-get install smbclient # for command line access
+apt-get install cifs-utils
+apt-get install smbclient
 ```
 
-To connect via the command line:
+Now, we can connect connect via the command line:
 
 ```sh
 smbclient //sdi5a.mi.hdm-stuttgart.de/smbshare -U smbtester
 ```
 
-To mount the directory:
+Alternatively, we can mount the directory:
 
 ```sh
 cd
 mkdir mnt
 mount -t cifs  //sdi4a.mi.hdm-stuttgart.de/smbtester ~/mnt/ -ouser=smbtester
 ```
-
-## Samba and LDAP
-
-TODO

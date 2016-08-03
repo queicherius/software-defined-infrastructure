@@ -125,7 +125,3 @@ smtpd_sasl_path = private/auth
 ```
 
 Now we can use our server in an email client (we used Thunderbird) and as a proof that everything is configured correctly send and receive emails (also from one server to another)!
-
-### Virtual users and our own domaina
-
-// TODO

@@ -116,20 +116,44 @@ Now update the virtual hosts file `/etc/apache2/sites-enabled/vhosts.conf` to ac
 
 ## LDAP authentication
 
+We can limit access to directories / vhosts using LDAP users as well. To enable this, we simply have to add the following to a vhost in `/etc/apache2/sites-enabled/vhosts.conf`:
+
 ```aconf
-<Directory "/www/docs/private">
-    AuthName "Private"
-    AuthType Basic
-    AuthBasicProvider file ldap
-    AuthUserFile "/usr/local/apache/passwd/passwords"
-    AuthLDAPURL ldap://ldaphost/o=yourorg
-    Require valid-user
-</Directory>
+<VirtualHost *:80>
+  ...
+  
+  Require valid-user
+  AuthName "Private"
+  AuthType Basic
+  AuthBasicProvider ldap
+  AuthLDAPURL ldap://sdi5b.mi.hdm-stuttgart.de/dc=betrayer,dc=com
+</VirtualHost>
 ```
 
 ## MySQL Database
 
-// TODO
+We want to run a MySQL database to run alongside our Apache server, as well as Adminer to manage it. First, we install the mysql server, answering "Yes" to all questions.
+
+```bash
+apt-get install mysql-server
+sudo mysql_install_db
+sudo /usr/bin/mysql_secure_installation
+```
+
+Since Adminer runs on PHP, we have to install an extension for PHP to speak with the MySQL database:
+
+```bash
+apt-get install php5-mysqlnd
+service apache2 restart
+```
+
+Lastly, we install Adminer, which is just downloading a single PHP file into a target directory
+
+```bash
+curl https://www.adminer.org/static/download/4.2.5/adminer-4.2.5-mysql.php > adminer/index.php
+```
+
+Now, we can visit [http://sdi5b.mi.hdm-stuttgart.de/adminer](http://sdi5b.mi.hdm-stuttgart.de/adminer) and see the Adminer interface greet us.
 
 ## Publish our documentation
 
