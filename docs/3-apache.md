@@ -116,7 +116,16 @@ Now update the virtual hosts file `/etc/apache2/sites-enabled/vhosts.conf` to ac
 
 ## LDAP authentication
 
-// TODO
+```aconf
+<Directory "/www/docs/private">
+    AuthName "Private"
+    AuthType Basic
+    AuthBasicProvider file ldap
+    AuthUserFile "/usr/local/apache/passwd/passwords"
+    AuthLDAPURL ldap://ldaphost/o=yourorg
+    Require valid-user
+</Directory>
+```
 
 ## MySQL Database
 
@@ -124,4 +133,11 @@ Now update the virtual hosts file `/etc/apache2/sites-enabled/vhosts.conf` to ac
 
 ## Publish our documentation
 
-// TODO
+Since we host our documentation on Github, we just create a HTML page linking there in the required directory:
+
+```bash
+mkdir -p /var/www/html/doc
+nano /var/www/html/doc/index.html
+```
+
+This will show up under the URL [http://sdi5b.mi.hdm-stuttgart.de/doc/](http://sdi5b.mi.hdm-stuttgart.de/doc/).

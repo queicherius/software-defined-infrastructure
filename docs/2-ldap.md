@@ -2,7 +2,7 @@
 
 ## Browse an existing LDAP server
 
-> Note: The following instructions assume the network of the server being public or being connected using a VPN
+> **Note:** The following instructions assume the network of the server being public or being connected using a VPN
 
 Connecting anonymously to an existing server with [Apache Directory Studio](https://directory.apache.org/studio/) can be easily achieved by adding a new connection with:
 
@@ -271,9 +271,3 @@ service slapd start
 ```
 
 We can now log into the other server and see our data copied over.
-
-## Replication
-
-[Click!](http://www.server-world.info/en/note?os=CentOS_6&p=ldap&f=8)
-
-## Accessing LDAP by a Java™ application
