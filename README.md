@@ -1,6 +1,7 @@
 # Software Defined Infrastructure
 
-This is the documentation for the practical exercises in the course **Software Defined Infrastructure**, lectured at the **[Hochschule der Medien](https://www.hdm-stuttgart.de/)** in Stuttgart. Written by **[dr044](https://github.com/queicherius)** and **[pg032](https://github.com/pguth)**.
+This is the documentation for the practical exercises in the course **Software Defined Infrastructure**, lectured at the **[Hochschule der Medien](https://www.hdm-stuttgart.de/)** in Stuttgart.
+Written by **[pguth](https://github.com/pguth)** and **[queicherius](https://github.com/queicherius)**.
 
 ### Table of Contents
 
