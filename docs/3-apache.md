@@ -41,7 +41,7 @@ Alias /xyz123 /home/sdidoc
 
 ## Virtual hosts
 
-When we configure our client machine to use our (private) nameserver we want to be able to call [xyz123.mi.hdm-stuttgart.de](xyz123.mi.hdm-stuttgart.de) and reach our documentation.
+When we configure our client machine to use our (private) nameserver we want to be able to call [http://xyz123.mi.hdm-stuttgart.de](http://xyz123.mi.hdm-stuttgart.de) and reach our documentation.
 
 We define two DNS aliases `xy123` and `manual` for our virtual machine in `/etc/bind/zones/db.mi.hdm-stuttgart.de`:
 
