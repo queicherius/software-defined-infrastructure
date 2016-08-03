@@ -8,7 +8,7 @@ Our goal is to monitor the services of an application server using a different m
 apt install nagios3 nagios-nrpe-plugin
 ```
 
-You should now be able to call [http://monitoringserver.ip/nagios3]() and see the Nagios dashboard, showing one host (the monitoring server itself) as running.
+You should now be able to call [http://monitoringserver.ip/nagios3](http://monitoringserver.ip/nagios3) and see the Nagios dashboard, showing one host (the monitoring server itself) as running.
 
 Then, we have to install the nrpe server on the application server. This allows the monitoring server to communicate remotely with the application server later on.
 

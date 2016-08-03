@@ -1,6 +1,6 @@
 # Mail
 
-## Install and send to local Users
+## Install and send to local users
 
 ### Installing and testing postfix
 

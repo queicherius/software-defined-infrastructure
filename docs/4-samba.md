@@ -17,14 +17,14 @@ smbpasswd -a smbtester
 
 ## Create a Samba user
 
-As the first step, we create the directory we want to to share:
+As the first step, we create the directory we want to share:
 
 ```sh
 cd
 mkdir smbshare
 ```
 
-Now we make Samba aware of it by adding the following to the very end of `/etc/samba/smb.conf`:
+Now we make Samba aware of it by adding the following at the very end of `/etc/samba/smb.conf`:
 
 ```
 [smbshare]
@@ -37,7 +37,7 @@ Now we have to restart the service using `service smbd restart` and test can the
 
 ## Connect and mount CIFS
 
-First, we have to install the utilites for mouting and command line access:
+First, we have to install the utilities for mounting and command line access:
 
 ```sh
 apt-get install cifs-utils

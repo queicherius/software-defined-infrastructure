@@ -6,7 +6,7 @@
 aptitude install apache2
 ```
 
-Upon visiting [http://sdi5b.mi.hdm-stuttgart.de/]() we are greeted with the apache default welcome page. When changing the file `/var/www/html/index.html`, the page content changes.
+Upon visiting [http://sdi5b.mi.hdm-stuttgart.de/](http://sdi5b.mi.hdm-stuttgart.de/) we are greeted with the apache default welcome page. When changing the file `/var/www/html/index.html`, the page content changes.
 
 ## Installing documentation
 
@@ -20,11 +20,11 @@ To find out where we can access our freshly installed documentation, we run `dpk
 dpkg -L apache2-doc | less
 ```
 
-There we look for apache configuration files and find `/etc/apache2/conf-available/apache2-doc.conf`, which includes an `Alias` from `/manual` to the directory of the manuals. Now we know, that we can access the manuals from [http://sdi5b.mi.hdm-stuttgart.de/manual]().
+There we look for apache configuration files and find `/etc/apache2/conf-available/apache2-doc.conf`, which includes an `Alias` from `/manual` to the directory of the manuals. Now we know, that we can access the manuals from [http://sdi5b.mi.hdm-stuttgart.de/manual](http://sdi5b.mi.hdm-stuttgart.de/manual).
 
 ## Configuring our own alias
 
-We want to be able to call [http://sdi5b.mi.hdm-stuttgart.de/xyz123]() and access the directory `/home/sdidoc` where we uploaded our documentation.
+We want to be able to call [http://sdi5b.mi.hdm-stuttgart.de/xyz123](http://sdi5b.mi.hdm-stuttgart.de/xyz123) and access the directory `/home/sdidoc` where we uploaded our documentation.
 
 We need to place a configuration file setting up the alias `/etc/apache2/conf-enabled/sdidoc.conf`:
 
@@ -41,7 +41,7 @@ Alias /xyz123 /home/sdidoc
 
 ## Virtual hosts
 
-When we configure our client machine to use our (private) nameserver we want to be able to call [xyz123.mi.hdm-stuttgart.de]() and reach our documentation.
+When we configure our client machine to use our (private) nameserver we want to be able to call [xyz123.mi.hdm-stuttgart.de](xyz123.mi.hdm-stuttgart.de) and reach our documentation.
 
 We define two DNS aliases `xy123` and `manual` for our virtual machine in `/etc/bind/zones/db.mi.hdm-stuttgart.de`:
 
@@ -72,7 +72,7 @@ service bind9 reload
 service apache2 reload
 ```
 
-To test that everything works (without ~~fun~~ VPN problems) we connect via SSH  using the `-Y` flag to our second server. On the server, we set the nameserver to our first server in the `/etc/resolv.conf`. Now we can start `iceweasel` and connect to one of our newly configured subdomains. Seeing our webpages verifies that the DNS setting are correct.
+To test that everything works (without ~~fun~~ VPN problems) we connect via SSH  using the `-Y` flag to our second server. On the server, we set the nameserver to our first server in the `/etc/resolv.conf`. Now we can start `iceweasel` and connect to one of our newly configured subdomains. Seeing our web pages verifies that the DNS setting is correct.
 
 ## SSL / TLS Support
 
@@ -86,7 +86,7 @@ apt-get install openssl
 Just follow the dialogue, but note that the following fields are mandatory:
 
 - PEM pass phrase (4+ characters)
-- Common Name
+- Common Name, which has to match the URL you later want see in the browser
 - Passphrase for `cakey.pem`
 
 ```bash
@@ -95,10 +95,6 @@ openssl genrsa -out /etc/ssl/private/apache.key 2048
 
 # Generate a certificate for our server
 openssl req -new -x509 -key /etc/ssl/private/apache.key -days 365 -sha256 -out /etc/ssl/certs/apache.crt
-
-# Generate a certificate signing request (CSR)
-# openssl req -new -key /etc/ssl/private/apache.key -out ~/apache.csr
-# TODO do you even sign, bro?
 ```
 
 Now update the virtual hosts file `/etc/apache2/sites-enabled/vhosts.conf` to actually use the certficate.
@@ -116,7 +112,7 @@ Now update the virtual hosts file `/etc/apache2/sites-enabled/vhosts.conf` to ac
 
 ## LDAP authentication
 
-We can limit access to directories / vhosts using LDAP users as well. To enable this, we simply have to add the following to a vhost in `/etc/apache2/sites-enabled/vhosts.conf`:
+We can limit access to directories / virtual hosts using LDAP users as well. To enable this, we simply have to add the following to a virtual host in `/etc/apache2/sites-enabled/vhosts.conf`:
 
 ```aconf
 <VirtualHost *:80>
@@ -132,7 +128,7 @@ We can limit access to directories / vhosts using LDAP users as well. To enable 
 
 ## MySQL Database
 
-We want to run a MySQL database to run alongside our Apache server, as well as Adminer to manage it. First, we install the mysql server, answering "Yes" to all questions.
+We want to run a MySQL database to run alongside our Apache server, as well as Adminer to manage it. First, we install the MySQL server, answering "Yes" to all questions.
 
 ```bash
 apt-get install mysql-server
@@ -147,13 +143,13 @@ apt-get install php5-mysqlnd
 service apache2 restart
 ```
 
-Lastly, we install Adminer, which is just downloading a single PHP file into a target directory
+Lastly, we install Adminer, which is just downloading a single PHP file into a target directory.
 
 ```bash
 curl https://www.adminer.org/static/download/4.2.5/adminer-4.2.5-mysql.php > adminer/index.php
 ```
 
-Now, we can visit [http://sdi5b.mi.hdm-stuttgart.de/adminer](http://sdi5b.mi.hdm-stuttgart.de/adminer) and see the Adminer interface greet us.
+Now, we can visit [http://sdi5b.mi.hdm-stuttgart.de/adminer](http://sdi5b.mi.hdm-stuttgart.de/adminer) and see the Adminer interface greet us, where we can log in with the database credentials.
 
 ## Publish our documentation
 

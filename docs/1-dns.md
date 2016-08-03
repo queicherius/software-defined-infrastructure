@@ -28,11 +28,11 @@ options {
   # Listen on the private network only (local IP)
   listen-on { 141.62.75.112; };
 
-  # Disable zone transfers, becaues we don't have a
+  # Disable zone transfers, because we don't have a
   # redundant infrastructure (primary / secondary dns)
   allow-transfer { none; };
 
-  # Currently we don't want to forward requests to stable nameservers
+  # Currently, we don't want to forward requests to stable nameservers
   forwarders {};
 
   # Use the default settings for validation and ipv6
@@ -50,13 +50,13 @@ service bind9 reload
 
 ## Basic configuration
 
-Now that we have a up and running DNS server, we create a folder for the zones we want to set up our nameserver for.
+Now that we have a running DNS server, we create a folder for the zones we want to set up.
 
 ```bash
 mkdir /etc/bind/zones
 ```
 
-We setup the forward lookup zone in `/etc/bind/zones/db.mi.hdm-stuttgart.de`. This maps hostnames to IP-Adresses.
+We setup the forward lookup zone in `/etc/bind/zones/db.mi.hdm-stuttgart.de`. This maps hostnames to IP adresses.
 
 ```
 $TTL    604800
@@ -78,7 +78,7 @@ www5_1.mi.hdm-stuttgart.de.       IN      CNAME   ns5.mi.hdm-stuttgart.de.
 www5_2.mi.hdm-stuttgart.de.       IN      CNAME   ns5.mi.hdm-stuttgart.de.
 ```
 
-We also have to set up the reverse lookup zone in `/etc/bind/zones/db.141.62.75`. This is the equivalent of the lookup zone we already set up and maps IP-Addresses to hostnames.
+We also have to set up the reverse lookup zone in `/etc/bind/zones/db.141.62.75`. This is the equivalent of the lookup zone we already set up and maps IP addresses to hostnames.
 
 ```
 $TTL    604800
@@ -97,7 +97,7 @@ $TTL    604800
 104   IN      PTR     sdi5b.mi.hdm-stuttgart.de.
 ```
 
-> **Note:** "Serial" denotes a version, which helps the secondary DNS recognise new zone files. The convention for naming this is `YYYYMMDDSS` with `SS` being an incrementing version number which has to be updated for every change.
+> **Note:** "Serial" denotes a version, which helps the secondary DNS (= slave server) recognise new zone files. The convention for naming this is `YYYYMMDDSS` with `SS` being an incrementing version number which has to be updated for every change.
 
 With our zones configured, we have to make bind9 aware of them. We add our new zones in `/etc/bind/named.conf.local`
 
@@ -113,7 +113,7 @@ zone "75.62.141.in-addr.arpa" {
 };
 ```
 
-To check if all the `named.conf*` files have a correct syntax (should return to the shell without any messages) we can run
+To check if the `named.conf.local` file has the correct syntax, we can run the following command, which should return to the shell without any messages:
 
 ```bash
 named-checkconf /etc/bind/named.conf.local
@@ -167,7 +167,7 @@ options {
 
 ## Mail exchange record
 
-Since we want to be able to send emails via our domain as well, we have to set up a MX record in `/etc/bind/zones/db.mi.hdm-stuttgart.de`. We already have a mail server provided by our system administrator, so we are going to use that.
+Since we want to be able to send emails via our domain as well, we have to set up an MX record in `/etc/bind/zones/db.mi.hdm-stuttgart.de`. We already have a mail server provided by our system administrator, so we are going to use that.
 
 ```
 ; name servers - NS records
@@ -185,4 +185,4 @@ nslookup
 > sdi5b.mi.hdm-stuttgart.de
 ```
 
-> **Note:** We couldn't actually check if emails could be delivered, because the Firewall was filtering out emails out as a security measure for the already existing mail servers.
+> **Note:** We couldn't actually check if emails could be delivered because the Firewall was filtering out emails out as a security measure for the already existing mail servers.
