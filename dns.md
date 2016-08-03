@@ -1,6 +1,6 @@
 # DNS
 
-> **Note:** If you are looking for the options of bind, [this website](http://www.zytrax.com/books/dns/ch7/statements.html) proved to be a good source of information.
+> **Note:** If you are looking for the options of `bind`, [this website](http://www.zytrax.com/books/dns/ch7/statements.html) proved to be a good source of information.
 
 ## Installing bind
 
@@ -22,7 +22,7 @@ Update the global options in `/etc/bind/named.conf.options`
 options {
   directory "/var/cache/bind";
 
-  # Disable recursive dns queries
+  # Disable recursive DNS queries
   recursion no;
 
   # Listen on the private network only (local IP)
@@ -97,7 +97,7 @@ $TTL    604800
 104   IN      PTR     sdi5b.mi.hdm-stuttgart.de.
 ```
 
-> **Note:** "Serial" denotes a version, which helps the secondary DNS recognize new zone files. The convention for naming this is `YYYYMMDDSS` with `SS` being a incrementing version number which has to be updated for every change.
+> **Note:** "Serial" denotes a version, which helps the secondary DNS recognise new zone files. The convention for naming this is `YYYYMMDDSS` with `SS` being an incrementing version number which has to be updated for every change.
 
 Make bind9 aware of our newly configured zones in `/etc/bind/named.conf.local`
 
@@ -135,14 +135,14 @@ dig @141.62.75.112 www5_1.mi.hdm-stuttgart.de
 # The added IP should resolve into the IP (reverse lookup)
 dig @141.62.75.112 -x 141.62.75.112
 
-# This should not resolve, since we don't have A name
-# records for it and recursive dns queries are disabled
+# This should not resolve since we don't have A name
+# records for it and recursive DNS queries are disabled
 dig @141.62.75.112 spiegel.de
 ```
 
 ## Forwarders
 
-Due to the `recursion no` in the configuration, currently only queries regarding objects within the defined zones are supported. To enable forwarding to "real" DNS servers we configure the options in `/etc/bind/named.conf.options`.
+Due to the `recursion no` in the configuration, currently, only queries regarding objects within the defined zones are supported. To enable forwarding to "real" DNS servers we configure the options in `/etc/bind/named.conf.options`.
 
 ```aconf
 options {

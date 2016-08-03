@@ -4,14 +4,14 @@
 
 ### Installing and testing postfix
 
-To send email an email server is needed, so we are going to install `postfix` as a first step. We also add a user that we are going to use for testing email delivery.
+To send email, an email server is needed, so we are going to install `postfix` as a first step. We also add a user that we are going to use for testing email delivery.
 
 ```bash
 apt-get install postfix
 adduser mailuser # we use "123" as a password here
 ```
 
-Now that we have a email server, let's check if it is up and running using telnet to connect to it:
+Now that we have an email server, let's check if it is up and running using telnet to connect to it:
 
 ```bash
 telnet localhost 25
@@ -47,7 +47,7 @@ newaliases
 
 ### Setting up MX records
 
-We want to use the server as the mailserver for our local machine, so first we have to specify an `MX` record in the DNS settings of the server (`/etc/bind/zones/db.mi.hdm-stuttgart.de`):
+We want to use the server as the mail server for our local machine, so first we have to specify an `MX` record in the DNS settings of the server (`/etc/bind/zones/db.mi.hdm-stuttgart.de`):
 
 ```
         IN      MX      ns5.mi.hdm-stuttgart.de.
@@ -55,9 +55,9 @@ sdi5a   IN      A       ns5.mi.hdm-stuttgart.de.
 sdi5b   IN      A       141.62.75.112
 ```
 
-This `MX` record has to point to a valid `A` record previously defined. In our case we are using the same `A` record as for the nameserver settings. Also the "subdomain" we are using for emails has to be a correct `A` record as well.
+This `MX` record has to point to a valid `A` record previously defined. In our case, we are using the same `A` record as for the nameserver settings. Also the "subdomain" we are using for emails has to be a correct `A` record as well.
 
-> **Note:** The bottom `A` record is not neccessary for local testing, since the record for the local hostname is already defined in the `/etc/hosts`, but we need it later.
+> **Note:** The bottom `A` record is not necessary for local testing since the record for the local hostname is already defined in the `/etc/hosts`, but we need it later.
 
 We also have to configure postfix to accept to allow for remote connections from any host (`/etc/postfix/main.cf`):
 
@@ -74,13 +74,13 @@ After restarting postfix (`service postfix restart`), we can connect from our lo
 telnet serverip 25
 ```
 
-> **Note**: When trying to send email from one server to another a `relay access denied` error pops up. This is because we are trying to send a mail from outside the network to a domain that our server is not authoriative for, thus the recieve connector does not grant us the permission for sending/relaying.
+> **Note**: When trying to send email from one server to another a `relay access denied` error pops up. This is because we are trying to send a mail from outside the network to a domain that our server is not authoritative for, thus the receive connector does not grant us the permission for sending/relaying.
 
 ## Authentication Setup and Virtual Users
 
 ### Add authentication to postfix
 
-To authenticate users for sending emails, we need a [sasl](https://en.wikipedia.org/wiki/Simple_Authentication_and_Security_Layer) implementation, in our case we chose [dovecot](http://www.dovecot.org/):
+To authenticate users for sending emails, we need a [sasl](https://en.wikipedia.org/wiki/Simple_Authentication_and_Security_Layer) implementation, in our case, we chose [dovecot](http://www.dovecot.org/):
 
 ```bash
 apt-get install dovecot-imapd dovecot-pop3
@@ -124,8 +124,8 @@ smtpd_sasl_auth_enable = yes
 smtpd_sasl_path = private/auth
 ```
 
-Now we can use our server in a email client (we used Thunderbird) and as a proof that everything is configured correctly send and recieve emails (also from one server to another)!
+Now we can use our server in an email client (we used Thunderbird) and as a proof that everything is configured correctly send and receive emails (also from one server to another)!
 
-### Virtual users and our own domain
+### Virtual users and our own domaina
 
 // TODO

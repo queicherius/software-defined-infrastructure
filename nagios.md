@@ -2,13 +2,13 @@
 
 ## Installing
 
-Our goal is to monitor the services of a application server using a different monitoring server. First, we have to install nagios on the monitoring server. This will ask for a password for the `nagiosadmin` user.
+Our goal is to monitor the services of an application server using a different monitoring server. First, we have to install Nagios on the monitoring server. This will ask for a password for the `nagiosadmin` user.
 
 ```bash
 apt install nagios3 nagios-nrpe-plugin
 ```
 
-You should now be able to call [http://monitoringserver.ip/nagios3]() and see the nagios dashboard, showing one host (the monitoring server itself) as running.
+You should now be able to call [http://monitoringserver.ip/nagios3]() and see the Nagios dashboard, showing one host (the monitoring server itself) as running.
 
 Then, we have to install the nrpe server on the application server. This allows the monitoring server to communicate remotely with the application server later on.
 
@@ -52,7 +52,7 @@ To add a new host, we copy the local configuration into a new configuration file
 cp /etc/nagios3/conf.d/localhost_nagios2.cfg /etc/nagios3/conf.d/server02.cfg
 ```
 
-Then we update the `host_name` everywhere to the hostname of the application server (in this case `sdi5b`) and update the `address` to match the ip adress of the application server (in this case `141.62.75.112`).
+Then we update the `host_name` everywhere to the hostname of the application server (in this case `sdi5b`) and update the `address` to match the IP address of the application server (in this case `141.62.75.112`).
 
 ```aconf
 define host {
@@ -124,7 +124,7 @@ We can apply the configuration once again with `service nagios3 reload`. After c
 
 ## Configuring "ldap" service
 
-Now we want to monitor that LDAP based https authentication as well as the LDAP server in general is functional on the application server. We define new services for that in the `/etc/nagios3/conf.d/server02.cfg` configuration file:
+Now we want to monitor that LDAP based HTTPS authentication, as well as the LDAP server in general, is functional on the application server. We define new services for that in the `/etc/nagios3/conf.d/server02.cfg` configuration file:
 
 ```aconf
 # Check if remote LDAP authentication with https works
@@ -140,7 +140,7 @@ define service {
   check_command           check_http!/our-ldap-secured-path!username:password
 }
 
-# Check if the interally accessible LDAP server is running
+# Check if the internally accessible LDAP server is running
 define command {
   command_name            check_ldap
   command_line            check_ldap -H $HOSTADDRESS$ -b $ARG1$ -D $ARG2$ -P $ARG3$

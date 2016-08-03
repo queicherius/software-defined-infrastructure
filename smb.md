@@ -5,7 +5,7 @@
 apt-get install samba
 ```
 
-Every Samba user needs to be a system user. Nonetheless Samba passwords are handled separately and stored in `/etc/samba/smbpasswd`.
+Every Samba user needs to be a system user. Nonetheless, Samba passwords are handled separately and stored in `/etc/samba/smbpasswd`.
 
 ```sh
 adduser smbtester

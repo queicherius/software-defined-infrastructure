@@ -47,8 +47,8 @@ We define two DNS aliases `xy123` and `manual` for our virtual machine in `/etc/
 
 ```
 ...
-manual.mi.hdm-stuttgart.de.	IN	CNAME	ns5.mi.hdm-stuttgart.de.
-xyz123.mi.hdm-stuttgart.de.	IN	CNAME	ns5.mi.hdm-stuttgart.de.
+manual.mi.hdm-stuttgart.de.    IN    CNAME    ns5.mi.hdm-stuttgart.de.
+xyz123.mi.hdm-stuttgart.de.    IN    CNAME    ns5.mi.hdm-stuttgart.de.
 ```
 
 Let's define the following vhosts in `/etc/apache2/sites-enabled/vhosts.conf` to link our subdomains to the directories the files live in:
@@ -76,18 +76,18 @@ To test that everything works (without ~~fun~~ VPN problems) we connect via SSH 
 
 ## SSL / TLS Support
 
-First off, we make sure openssl is installed and create an own certificate authority (CA).
+First off, we make sure OpenSSL is installed and create an own certificate authority (CA).
 
 ```bash
 apt-get install openssl
 /usr/lib/ssl/misc/CA.pl -newca
 ```
 
-Just follow the dialog, but note that the following fields are mandatory:
+Just follow the dialogue, but note that the following fields are mandatory:
 
 - PEM pass phrase (4+ characters)
 - Common Name
-- Pass phrase for `cakey.pem`
+- Passphrase for `cakey.pem`
 
 ```bash
 # Generate a key for our server
